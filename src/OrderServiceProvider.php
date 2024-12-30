@@ -8,19 +8,22 @@ use Filament\Support\Assets\Css;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Filesystem\Filesystem;
 use Livewire\Features\SupportTesting\Testable;
+use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Wsmallnews\Order\Commands\OrderCommand;
+use Wsmallnews\Order\Components\Confirm;
 use Wsmallnews\Order\Testing\TestsOrder;
 
 class OrderServiceProvider extends PackageServiceProvider
 {
-    public static string $name = 'order';
+    public static string $name = 'sn-order';
 
-    public static string $viewNamespace = 'order';
+    public static string $viewNamespace = 'sn-order';
 
     public function configurePackage(Package $package): void
     {
@@ -62,6 +65,11 @@ class OrderServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        // 注册模型别名
+        Relation::enforceMorphMap([
+            static::$name => 'Wsmallnews\Comment\Models\Order',
+        ]);
+
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
@@ -85,6 +93,8 @@ class OrderServiceProvider extends PackageServiceProvider
             }
         }
 
+        Livewire::component('sn-order-confirm', Confirm::class);
+
         // Testing
         Testable::mixin(new TestsOrder);
     }
@@ -101,8 +111,8 @@ class OrderServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('order', __DIR__ . '/../resources/dist/components/order.js'),
-            Css::make('order-styles', __DIR__ . '/../resources/dist/order.css'),
-            Js::make('order-scripts', __DIR__ . '/../resources/dist/order.js'),
+            // Css::make('order-styles', __DIR__ . '/../resources/dist/order.css'),
+            // Js::make('order-scripts', __DIR__ . '/../resources/dist/order.js'),
         ];
     }
 
@@ -146,7 +156,7 @@ class OrderServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_order_table',
+            'create_sn_order_table',
         ];
     }
 }

@@ -9,7 +9,7 @@ class OrderPlugin implements Plugin
 {
     public function getId(): string
     {
-        return 'order';
+        return 'sn-order';
     }
 
     public function register(Panel $panel): void
