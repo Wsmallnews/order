@@ -6,9 +6,8 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 use Wsmallnews\Support\Enums\Traits\EnumHelper;
 
-Enum RefundStatus :string implements HasColor, HasLabel
+enum RefundStatus: string implements HasColor, HasLabel
 {
-
     use EnumHelper;
 
     case Unrefund = 'unrefund';
@@ -16,7 +15,7 @@ Enum RefundStatus :string implements HasColor, HasLabel
     case Hasrefund = 'hasrefund';
 
     case Refunded = 'refunded';
-    
+
     public function getLabel(): ?string
     {
         return match ($this) {
@@ -26,7 +25,6 @@ Enum RefundStatus :string implements HasColor, HasLabel
         };
     }
 
-    
     public function getColor(): string | array | null
     {
         return match ($this) {
@@ -35,5 +33,4 @@ Enum RefundStatus :string implements HasColor, HasLabel
             self::Refunded => 'danger',
         };
     }
-
 }

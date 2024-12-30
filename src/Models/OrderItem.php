@@ -2,15 +2,12 @@
 
 namespace Wsmallnews\Order\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Wsmallnews\Order\Enums;
 use Wsmallnews\Support\Casts\MoneyCast;
 use Wsmallnews\Support\Models\SupportModel;
 
 class OrderItem extends SupportModel
 {
-
     protected $table = 'sn_order_items';
 
     protected $guarded = [];
@@ -44,9 +41,6 @@ class OrderItem extends SupportModel
         'delivery_status' => Enums\Item\DeliveryStatus::class,
         'aftersale_status' => Enums\Item\AftersaleStatus::class,
     ];
-
-
-
 
     public function user()
     {

@@ -3,16 +3,11 @@
 namespace Wsmallnews\Order\Pipes\Shop\Calc;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\CalcPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Order\Contracts\Pipes\CalcPipeInterface;
+use Wsmallnews\Order\OrderRocket;
 
 class Start implements CalcPipeInterface
 {
-
     public function calc(OrderRocket $rocket, Closure $next): OrderRocket
     {
         // 组合字段初始化
@@ -54,7 +49,7 @@ class Start implements CalcPipeInterface
             // 总计，包含 relate 费用，运费等
             $buyInfo['original_amount'] = '0';                    // 原始总价 (原始总计 + 原始运费等等)
             $buyInfo['amount'] = '0';                             // 总价(总计 + 运费等等)
-            
+
             // 配送费有字段单独记录
             $buyInfo['delivery_amount'] = '0';                             // 配送费
 
@@ -66,7 +61,6 @@ class Start implements CalcPipeInterface
             $buyInfo['reonly_fee'] = '0';
         }
         $rocket->setRelateItems($relateItems);
-
 
         $response = $next($rocket);
 
@@ -87,23 +81,23 @@ class Start implements CalcPipeInterface
 
             // 原始总计
             foreach ($originalAmountFields as $key => $amount_field) {
-                $buyInfo['original_amount'] = bcadd($buyInfo['original_amount'], (string)$amount_field, 2);
+                $buyInfo['original_amount'] = bcadd($buyInfo['original_amount'], (string) $amount_field, 2);
             }
 
             // 总计
             foreach ($amountFields as $key => $amount_field) {
-                $buyInfo['amount'] = bcadd($buyInfo['amount'], (string)$amount_field, 2);
+                $buyInfo['amount'] = bcadd($buyInfo['amount'], (string) $amount_field, 2);
             }
 
             // 优惠总计
             foreach ($discountFields as $key => $discount_field) {
-                $buyInfo['discount_amount'] = bcadd($buyInfo['discount_amount'], (string)$discount_field, 2);
+                $buyInfo['discount_amount'] = bcadd($buyInfo['discount_amount'], (string) $discount_field, 2);
             }
 
             // total_fee = 总费用 - 总优惠； pay_fee = (总费用 - 配送费) - 总优惠
             $buyInfo['reonly_fee'] = $buyInfo['total_fee'] = bcsub($buyInfo['amount'], $buyInfo['discount_amount'], 2);
             if (isset($buyInfo['delivery_amount'])) {
-                $buyInfo['reonly_fee'] = bcsub($buyInfo['total_fee'], (string)$buyInfo['delivery_amount'], 2);
+                $buyInfo['reonly_fee'] = bcsub($buyInfo['total_fee'], (string) $buyInfo['delivery_amount'], 2);
             }
         }
         $rocket->setRelateItems($relateItems);
@@ -140,5 +134,4 @@ class Start implements CalcPipeInterface
 
         return $response;
     }
-
 }

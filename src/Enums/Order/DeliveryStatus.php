@@ -6,9 +6,8 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 use Wsmallnews\Support\Enums\Traits\EnumHelper;
 
-Enum DeliveryStatus :string implements HasColor, HasLabel
+enum DeliveryStatus: string implements HasColor, HasLabel
 {
-
     use EnumHelper;
 
     case WaitingSend = 'waiting_send';
@@ -16,7 +15,7 @@ Enum DeliveryStatus :string implements HasColor, HasLabel
     case WaitingGet = 'waiting_get';
 
     case Geted = 'geted';
-    
+
     public function getLabel(): ?string
     {
         return match ($this) {
@@ -26,7 +25,6 @@ Enum DeliveryStatus :string implements HasColor, HasLabel
         };
     }
 
-    
     public function getColor(): string | array | null
     {
         return match ($this) {
@@ -35,5 +33,4 @@ Enum DeliveryStatus :string implements HasColor, HasLabel
             self::Geted => 'success',
         };
     }
-
 }

@@ -3,16 +3,11 @@
 namespace Wsmallnews\Order\Pipes\Shop\Summary;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\SummaryPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Order\Contracts\Pipes\SummaryPipeInterface;
+use Wsmallnews\Order\OrderRocket;
 
 class Start implements SummaryPipeInterface
 {
-
     public function summary(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $response = $next($rocket);
@@ -24,11 +19,11 @@ class Start implements SummaryPipeInterface
         $rocket->mergePayloads([
             'original_amount_fields' => $radars['original_amount_fields'],
             'amount_fields' => $radars['amount_fields'],
-            'discount_fields'  => $radars['discount_fields'],
+            'discount_fields' => $radars['discount_fields'],
 
             // 关联项目的总金额，订单存表用
-            'relate_original_amount'  => $radars['relate_original_amount'],
-            'relate_amount'  => $radars['relate_amount'],
+            'relate_original_amount' => $radars['relate_original_amount'],
+            'relate_amount' => $radars['relate_amount'],
 
             'original_amount_fields_info' => $radars['original_amount_fields_info'],
             'amount_fields_info' => $radars['amount_fields_info'],
@@ -42,8 +37,6 @@ class Start implements SummaryPipeInterface
 
             'order' => null,        // create 时候会存上
         ]);
-
-
 
         // $rocket->mergePayloads([
         //     'remark' => $rocket->getParam('remark'),
@@ -65,5 +58,4 @@ class Start implements SummaryPipeInterface
 
         return $response;
     }
-
 }

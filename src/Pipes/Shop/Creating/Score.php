@@ -3,16 +3,12 @@
 namespace Wsmallnews\Order\Pipes\Shop\Creating;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\CreatingPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Order\Contracts\Pipes\CreatingPipeInterface;
+use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\OrderRocket;
 
 class Score implements CreatingPipeInterface
 {
-
     public function creating(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $score_amount = intval($rocket->getPayload('score_amount', 0));
@@ -44,5 +40,4 @@ class Score implements CreatingPipeInterface
 
         return $response;
     }
-
 }

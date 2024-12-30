@@ -3,16 +3,12 @@
 namespace Wsmallnews\Order\Pipes\Shop\Creating;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\CreatingPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Order\Contracts\Pipes\CreatingPipeInterface;
+use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\OrderRocket;
 
 class Money implements CreatingPipeInterface
 {
-
     public function creating(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $money = floatval($rocket->getParam('money', 0));         // 用户选择余额抵扣金额
@@ -43,5 +39,4 @@ class Money implements CreatingPipeInterface
 
         return $response;
     }
-
 }

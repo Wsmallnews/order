@@ -3,44 +3,34 @@
 namespace Wsmallnews\Order\Shortcuts;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Pipeline;
 use Wsmallnews\Order\Contracts\Shortcuts\ShortcutInterface;
-use Wsmallnews\Order\Enums\Item\{
-    PayStatus,
-    RefundStatus,
-    DeliveryStatus,
-    AftersaleStatus,
-    EvaluateStatus,
-};
+use Wsmallnews\Order\Enums\Item\AftersaleStatus;
+use Wsmallnews\Order\Enums\Item\DeliveryStatus;
+use Wsmallnews\Order\Enums\Item\EvaluateStatus;
+use Wsmallnews\Order\Enums\Item\PayStatus;
+use Wsmallnews\Order\Enums\Item\RefundStatus;
 use Wsmallnews\Order\Models\Order;
 use Wsmallnews\Order\Models\OrderItem;
 use Wsmallnews\Order\OrderRocket;
-use Wsmallnews\Order\Pipes\Shop\{
-    Get\Start as StartGetPipe,
-    Get\Product as ProductGetPipe,
-
-    Check\Start as StartCheckPipe,
-    Check\Product as ProductCheckPipe,
-    Check\ProductAttribute as ProductAttributeCheckPipe,
-
-    Calc\Start as StartCalcPipe,
-    Calc\Product as ProductCalcPipe,
-    Calc\ProductAttribute as ProductAttributeCalcPipe,
-
-    Summary\Start as StartSummaryPipe,
-    Summary\Product as ProductSummaryPipe,
-    Summary\ProductAttribute as ProductAttributeSummaryPipe,
-
-    Creating\Start as StartCreatingPipe,
-    Creating\Money as MoneyCreatingPipe,
-    Creating\Score as ScoreCreatingPipe,
-    Creating\LimitBuy as LimitBuyCreatingPipe,
-    Creating\Cart as CartCreatingPipe,
-};
+use Wsmallnews\Order\Pipes\Shop\Calc\Product as ProductCalcPipe;
+use Wsmallnews\Order\Pipes\Shop\Calc\ProductAttribute as ProductAttributeCalcPipe;
+use Wsmallnews\Order\Pipes\Shop\Calc\Start as StartCalcPipe;
+use Wsmallnews\Order\Pipes\Shop\Check\Product as ProductCheckPipe;
+use Wsmallnews\Order\Pipes\Shop\Check\ProductAttribute as ProductAttributeCheckPipe;
+use Wsmallnews\Order\Pipes\Shop\Check\Start as StartCheckPipe;
+use Wsmallnews\Order\Pipes\Shop\Creating\Cart as CartCreatingPipe;
+use Wsmallnews\Order\Pipes\Shop\Creating\LimitBuy as LimitBuyCreatingPipe;
+use Wsmallnews\Order\Pipes\Shop\Creating\Money as MoneyCreatingPipe;
+use Wsmallnews\Order\Pipes\Shop\Creating\Score as ScoreCreatingPipe;
+use Wsmallnews\Order\Pipes\Shop\Creating\Start as StartCreatingPipe;
+use Wsmallnews\Order\Pipes\Shop\Get\Product as ProductGetPipe;
+use Wsmallnews\Order\Pipes\Shop\Get\Start as StartGetPipe;
+use Wsmallnews\Order\Pipes\Shop\Summary\Product as ProductSummaryPipe;
+use Wsmallnews\Order\Pipes\Shop\Summary\ProductAttribute as ProductAttributeSummaryPipe;
+use Wsmallnews\Order\Pipes\Shop\Summary\Start as StartSummaryPipe;
 
 class Shop implements ShortcutInterface
 {
-
     protected $order_type = 'product';
 
     public function __construct($order_type = 'product')
@@ -48,11 +38,8 @@ class Shop implements ShortcutInterface
         $this->order_type = $order_type;
     }
 
-
     /**
      * 获取项目的 pipes
-     *
-     * @return array
      */
     public function getGetPipes(): array
     {
@@ -71,12 +58,8 @@ class Shop implements ShortcutInterface
         return $getPipes;
     }
 
-
-
     /**
      * 获取检测的 pipes
-     *
-     * @return array
      */
     public function getCheckPipes(): array
     {
@@ -100,12 +83,8 @@ class Shop implements ShortcutInterface
         return $checkPipes;
     }
 
-
-
     /**
      * 获取计算的 pipes
-     *
-     * @return array
      */
     public function getCalcPipes(): array
     {
@@ -128,8 +107,6 @@ class Shop implements ShortcutInterface
         return $calcPipes;
     }
 
-
-
     public function getSummaryPipes(): array
     {
         // 通过 getCalcPipes 调用,只能写后置内容
@@ -137,7 +114,7 @@ class Shop implements ShortcutInterface
             'start' => StartSummaryPipe::class,
 
             'product' => ProductSummaryPipe::class,
-            
+
             'product_attribute' => ProductAttributeSummaryPipe::class,
 
             // 'invoice' => InvoiceSummaryPipe::class,
@@ -146,12 +123,8 @@ class Shop implements ShortcutInterface
         return $endPipes;
     }
 
-
-
     /**
      * 获取创建的 pipes
-     *
-     * @return array
      */
     public function getCreatingPipes(): array
     {
@@ -177,14 +150,11 @@ class Shop implements ShortcutInterface
         return $creatingPipes;
     }
 
-
-
     /**
      * 退款的 pipes @sn todo 这里还需要重新整理
      *
-     * @param string $back_type     退回类型
-     * @param string $relate_id     退款id
-     * @return array
+     * @param  string  $back_type  退回类型
+     * @param  string  $relate_id  退款id
      */
     public function getRefundPipes($back_type, $relate_id = 0): array
     {
@@ -198,13 +168,10 @@ class Shop implements ShortcutInterface
         return $refundPipes;
     }
 
-
-
     /**
      * 订单失效的 pipes (没有付款)
      *
-     * @param string $back_type     退回类型
-     * @return array
+     * @param  string  $back_type  退回类型
      */
     public function getInvalidPipes($back_type): array
     {
@@ -218,11 +185,9 @@ class Shop implements ShortcutInterface
         return $invalidPipes;
     }
 
-
     /**
      * 保存 当前 shortcut 特有的 项目表
      *
-     * @param OrderRocket $rocket
      * @return \think\Collection
      */
     public function save(OrderRocket $rocket): Collection
@@ -237,7 +202,7 @@ class Shop implements ShortcutInterface
 
         // 添加 订单 商品
         foreach ($products as $key => $buyInfo) {
-            $orderItem = new OrderItem();
+            $orderItem = new OrderItem;
 
             // $orderItem->scope_type = $scope_type;
             // $orderItem->store_id = $store_id;
@@ -261,12 +226,12 @@ class Shop implements ShortcutInterface
 
             $orderItem->stock_unit = $buyInfo['stock_unit'];
             $orderItem->stock_type = $buyInfo['stock_type'];
-            
+
             $orderItem->original_amount_fields = $buyInfo['original_amount_fields'];
             $orderItem->amount_fields = $buyInfo['amount_fields'];
             $orderItem->amount = $buyInfo['amount'];
             $orderItem->score_amount = $buyInfo['score_amount'] ?? 0;
-            
+
             $orderItem->discount_fields = $buyInfo['discount_fields'] ?? [];
             $orderItem->discount_amount = $buyInfo['discount_amount'];
             $orderItem->total_fee = $buyInfo['total_fee'];
@@ -274,7 +239,7 @@ class Shop implements ShortcutInterface
 
             $orderItem->pay_status = PayStatus::Unpaid;
             $orderItem->delivery_type = $buyInfo['delivery_type'];
-            
+
             $orderItem->delivery_status = DeliveryStatus::WaitingSend;
             $orderItem->delivery_amount = $buyInfo['delivery_amount'];
 
@@ -286,7 +251,7 @@ class Shop implements ShortcutInterface
             $orderItem->fields_infos = $buyInfo['fields_infos'];
 
             $options = [
-                'order_status' => 'normal'          // 刚下单都是正常状态，订单 closed 的时候，会变成 closed 状态
+                'order_status' => 'normal',          // 刚下单都是正常状态，订单 closed 的时候，会变成 closed 状态
             ];
             $orderItem->options = array_merge($options, $buyInfo['options'] ?? []);
 
@@ -301,14 +266,12 @@ class Shop implements ShortcutInterface
         return $orderItems;
     }
 
-
-
     /**
      * 添加套餐商品的 套餐项
      *
-     * @param \think\Model $order
-     * @param \think\Model $orderProduct
-     * @param array $buyInfo
+     * @param  \think\Model  $order
+     * @param  \think\Model  $orderProduct
+     * @param  array  $buyInfo
      * @return void
      */
     // public function orderProductPackageRelate($order, $orderProduct, $buyInfo)
@@ -353,12 +316,10 @@ class Shop implements ShortcutInterface
     //     }
     // }
 
-
-
     /**
      * 失败时执行此方法
      *
-     * @param OrderRocket $rocket
+     * @param  OrderRocket  $rocket
      * @return void
      */
     // public function failBack(OrderRocket $rocket): void

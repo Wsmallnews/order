@@ -3,22 +3,18 @@
 namespace Wsmallnews\Order\Pipes\Shop\Check;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\CheckPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
+use Wsmallnews\Order\Contracts\Pipes\CheckPipeInterface;
+use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\OrderRocket;
 use Wsmallnews\Product\ProductAttributeManager;
-use Wsmallnews\Support\Exceptions\SupportException;
 
 class ProductAttribute implements CheckPipeInterface
 {
-
     public function check(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $products = $rocket->getRelateItems();
 
-        $productAttributeManager = new ProductAttributeManager();
+        $productAttributeManager = new ProductAttributeManager;
 
         foreach ($products as $key => &$buyInfo) {
             $product = $buyInfo['product'];
@@ -43,5 +39,4 @@ class ProductAttribute implements CheckPipeInterface
 
         return $next($rocket);
     }
-
 }

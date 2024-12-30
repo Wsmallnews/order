@@ -3,16 +3,11 @@
 namespace Wsmallnews\Order\Pipes\Shop\Summary;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\SummaryPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Order\Contracts\Pipes\SummaryPipeInterface;
+use Wsmallnews\Order\OrderRocket;
 
 class ProductAttribute implements SummaryPipeInterface
 {
-
     public function summary(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $products = $rocket->getRelateItems();

@@ -2,21 +2,18 @@
 
 namespace Wsmallnews\Order\Components;
 
-use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Livewire\Component;
 use Wsmallnews\Order\OrderCreate;
 use Wsmallnews\Order\OrderRocket;
 use Wsmallnews\Order\Shortcuts\Shop as ShopShortcut;
 
-class Confirm extends Component implements HasForms, HasActions
+class Confirm extends Component implements HasActions, HasForms
 {
-
     use InteractsWithActions;
     use InteractsWithForms;
 
@@ -31,14 +28,16 @@ class Confirm extends Component implements HasForms, HasActions
     public string $type = 'calc';       // calc=计算，create=创建
 
     public array $relateItems = [];
+
     public int $address_id = 0;
+
     public int $coupon_id = 0;
+
     public string $remark = '';
 
     public string $from = 'product-detail';
 
     public string $platform = 'web';
-
 
     public function mount(array $relateItems, ?string $order_type, ?string $from)
     {
@@ -46,7 +45,6 @@ class Confirm extends Component implements HasForms, HasActions
         $this->order_type = $order_type ?: $this->order_type;
         $this->from = $from ?: $this->from;
     }
-
 
     public function boot()
     {
@@ -65,15 +63,12 @@ class Confirm extends Component implements HasForms, HasActions
         $this->rocket = $this->orderCreate->calc($this->type);
     }
 
-
     public function create()
     {
         $order = $this->orderCreate->create($this->rocket);
 
         $this->dispatch('order-create-finish', order_sn: $order->order_sn);
     }
-
-
 
     public function render()
     {
@@ -86,7 +81,7 @@ class Confirm extends Component implements HasForms, HasActions
             'coupon_id' => $this->coupon_id,
             'remark' => $this->remark,
             'from' => $this->from,
-            ...$payloads
+            ...$payloads,
         ])->title('订单确认');
     }
 }

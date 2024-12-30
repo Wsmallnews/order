@@ -5,12 +5,11 @@ namespace Wsmallnews\Order\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Wsmallnews\Order\Enums;
-use Wsmallnews\Support\Models\SupportModel;
 use Wsmallnews\Support\Casts\MoneyCast;
+use Wsmallnews\Support\Models\SupportModel;
 
 class Order extends SupportModel
 {
-
     protected $table = 'sn_orders';
 
     protected $guarded = [];
@@ -42,7 +41,6 @@ class Order extends SupportModel
         'paid_at' => 'timestamp',
     ];
 
-
     // protected function childrenNum(): Attribute
     // {
     //     $children = $this->children;
@@ -50,11 +48,6 @@ class Order extends SupportModel
     //         get: fn () => $children->count(),
     //     );
     // }
-
-
-
-
-
 
     public function user(): BelongsTo
     {

@@ -6,9 +6,8 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 use Wsmallnews\Support\Enums\Traits\EnumHelper;
 
-Enum EvaluateStatus :string implements HasColor, HasLabel
+enum EvaluateStatus: string implements HasColor, HasLabel
 {
-
     use EnumHelper;
 
     case Unevaluate = 'unevaluate';
@@ -23,7 +22,6 @@ Enum EvaluateStatus :string implements HasColor, HasLabel
         };
     }
 
-    
     public function getColor(): string | array | null
     {
         return match ($this) {
@@ -31,5 +29,4 @@ Enum EvaluateStatus :string implements HasColor, HasLabel
             self::Evaluated => 'success',
         };
     }
-
 }

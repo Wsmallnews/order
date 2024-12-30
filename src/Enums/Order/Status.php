@@ -7,9 +7,8 @@ use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasLabel;
 use Wsmallnews\Support\Enums\Traits\EnumHelper;
 
-Enum Status :string implements HasColor, HasLabel, HasDescription
+enum Status: string implements HasColor, HasDescription, HasLabel
 {
-
     use EnumHelper;
 
     case Closed = 'closed';
@@ -17,15 +16,15 @@ Enum Status :string implements HasColor, HasLabel, HasDescription
     case Unpaid = 'unpaid';
 
     case Paid = 'paid';
-    
+
     case ApplyingRefund = 'applying_refund';
-    
+
     case WaitingSend = 'waiting_send';
-    
+
     case WaitingGet = 'waiting_get';
 
     case Geted = 'geted';
-    
+
     case Completed = 'completed';
 
     public function getLabel(): ?string
@@ -42,7 +41,6 @@ Enum Status :string implements HasColor, HasLabel, HasDescription
         };
     }
 
-    
     public function getColor(): string | array | null
     {
         return match ($this) {
@@ -57,7 +55,6 @@ Enum Status :string implements HasColor, HasLabel, HasDescription
         };
     }
 
-
     public function getDescription(): ?string
     {
         return match ($this) {
@@ -71,5 +68,4 @@ Enum Status :string implements HasColor, HasLabel, HasDescription
             self::Completed => '交易完成.',
         };
     }
-
 }

@@ -8,7 +8,6 @@ use Wsmallnews\Support\Enums\Traits\EnumHelper;
 
 enum RefundStatus: string implements HasColor, HasLabel
 {
-
     use EnumHelper;
 
     case Unrefund = 'unrefund';
@@ -22,7 +21,6 @@ enum RefundStatus: string implements HasColor, HasLabel
             self::Refunded => '已退款',
         };
     }
-
 
     public function getColor(): string | array | null
     {

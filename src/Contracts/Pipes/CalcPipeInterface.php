@@ -10,13 +10,8 @@ use Wsmallnews\Order\OrderRocket;
  */
 interface CalcPipeInterface
 {
-
     /**
      * 计算
-     *
-     * @param OrderRocket $rocket
-     * @param Closure $next
-     * @return OrderRocket
      */
     public function calc(OrderRocket $rocket, Closure $next): OrderRocket;
 }

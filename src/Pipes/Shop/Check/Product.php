@@ -3,21 +3,17 @@
 namespace Wsmallnews\Order\Pipes\Shop\Check;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\CheckPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Order\Contracts\Pipes\CheckPipeInterface;
+use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\OrderRocket;
 
 class Product implements CheckPipeInterface
 {
-
     public function check(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $products = $rocket->getRelateItems();
 
-        if (!count($products)) {
+        if (! count($products)) {
             throw (new OrderCreateException('请选择要购买的产品'))->setRocket($rocket);
         }
 
@@ -42,9 +38,6 @@ class Product implements CheckPipeInterface
 
         $response = $next($rocket);
 
-
-
         return $response;
     }
-
 }

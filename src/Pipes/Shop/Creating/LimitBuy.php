@@ -3,16 +3,12 @@
 namespace Wsmallnews\Order\Pipes\Shop\Creating;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\CreatingPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Order\Contracts\Pipes\CreatingPipeInterface;
+use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\OrderRocket;
 
 class LimitBuy implements CreatingPipeInterface
 {
-
     public function creating(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $user = $rocket->getRadar('user');
@@ -30,7 +26,7 @@ class LimitBuy implements CreatingPipeInterface
             if ($limit_num) {
                 // 查询用户老订单，判断本次下单数量，判断是否超过购买限制, 未支付的或者已完成的都算
                 $buy_stock_num = OrderItem::where('user_id', $user['id'])->where('product_id', $product['id'])
-                    ->where(function ($query) use ($limit_type, $product) {
+                    ->where(function ($query) use ($limit_type) {
                         if ($limit_type == 'daily') {
                             // 按天限购
                             $daily_start = strtotime(date('Y-m-d'));
@@ -57,6 +53,7 @@ class LimitBuy implements CreatingPipeInterface
                     if ($buy_stock_num < $limit_num) {
                         $msg .= '，当前还可购买 ' . ($limit_num - $buy_stock_num) . ' ' . ($product['stock_unit'] ?: '件');
                     }
+
                     throw (new OrderCreateException($msg))->setRocket($rocket);
                 }
             }
@@ -66,8 +63,6 @@ class LimitBuy implements CreatingPipeInterface
 
         // ==============================后置 所有中间件走完之后，再执行=============================
 
-
         return $response;
     }
-
 }

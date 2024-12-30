@@ -13,13 +13,10 @@ return [
      */
     'order_item_table_name' => 'sn_order_items',
 
-
-
     /*
      * Model name for order record.
      */
     'order_model' => \Wsmallnews\Order\Models\Order::class,
-
 
     /*
      * Model name for user.

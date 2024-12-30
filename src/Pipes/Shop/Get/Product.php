@@ -3,18 +3,14 @@
 namespace Wsmallnews\Order\Pipes\Shop\Get;
 
 use Closure;
-use Wsmallnews\Order\{
-    Contracts\Pipes\GetPipeInterface,
-    Exceptions\OrderCreateException,
-    OrderRocket,
-};
-use Wsmallnews\Product\Models\Product as ProductModel;
+use Wsmallnews\Order\Contracts\Pipes\GetPipeInterface;
+use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\OrderRocket;
 use Wsmallnews\Product\Enums\SkuPriceStatus;
-use Wsmallnews\Support\Exceptions\SupportException;
+use Wsmallnews\Product\Models\Product as ProductModel;
 
 class Product implements GetPipeInterface
 {
-
     public function get(OrderRocket $rocket, Closure $next): OrderRocket
     {
         $scope_type = $rocket->getParam('scope_type', 'shop');
@@ -34,19 +30,17 @@ class Product implements GetPipeInterface
             // @sn todo 这里要考虑如何写 transformer
             $product = $product->findOrFail($buyInfo['product_id']);
 
-                // ->transform('buy', ['sku_prices', 'attributes.children'], [
-                //     'scope_type' => $scope_type,
-                //     'store_id' => $store_id
-                // ]);
+            // ->transform('buy', ['sku_prices', 'attributes.children'], [
+            //     'scope_type' => $scope_type,
+            //     'store_id' => $store_id
+            // ]);
 
             $buyInfo['product'] = $product;
         }
 
         $rocket->setRelateItems($products);
 
-
         $response = $next($rocket);
-
 
         // ==============================后置 所有中间件走完之后，再计算=============================
         // 获取关联列表
@@ -61,16 +55,16 @@ class Product implements GetPipeInterface
             foreach ($skuPrices as $key => $skuPrice) {
                 if ($skuPrice->id == $product_sku_price_id && $skuPrice->status == SkuPriceStatus::Up) {
                     $buyInfo['current_sku_price'] = $skuPrice;      // 当前购买规格
+
                     break;
                 }
             }
 
-            if (!isset($buyInfo['current_sku_price']) || !$buyInfo['current_sku_price']) {
+            if (! isset($buyInfo['current_sku_price']) || ! $buyInfo['current_sku_price']) {
                 throw (new OrderCreateException('商品规格不存在'))->setRocket($rocket);
             }
         }
 
         return $response;
     }
-
 }

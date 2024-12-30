@@ -6,7 +6,6 @@ use Wsmallnews\Support\Rocket;
 
 class OrderRocket extends Rocket
 {
-
     /**
      * 获取当前用户
      *
@@ -20,8 +19,7 @@ class OrderRocket extends Rocket
     /**
      * 设置当前用户
      *
-     * @param \think\Model $user
-     * @return Rocket
+     * @param  \think\Model  $user
      */
     public function setUser($user): Rocket
     {
@@ -29,7 +27,6 @@ class OrderRocket extends Rocket
 
         return $this;
     }
-
 
     /**
      * 获取当前计算类型
@@ -41,12 +38,10 @@ class OrderRocket extends Rocket
         return $this->getRadar('calc_type');
     }
 
-
     /**
      * 设置当前计算类型
      *
-     * @param string $calc_type
-     * @return Rocket
+     * @param  string  $calc_type
      */
     public function setCalcType($calc_type): Rocket
     {
@@ -55,17 +50,13 @@ class OrderRocket extends Rocket
         return $this;
     }
 
-
     /**
      * 获取商品列表
-     *
-     * @return array
      */
     public function getRelateItems(): array
     {
         return $this->getRadar('relate_items', []);
     }
-
 
     public function setRelateItems($relateItems): Rocket
     {
@@ -75,21 +66,16 @@ class OrderRocket extends Rocket
         return $this;
     }
 
-
-
     public function radarAdditionAmount($field, $value): Rocket
     {
         if ($this->getRadar($field)) {
-            $value = bcadd((string)$this->getRadar($field), (string)$value, 2);
+            $value = bcadd((string) $this->getRadar($field), (string) $value, 2);
         }
 
-        $this->setRadar($field, number_format((float)$value, 2, '.', ''));
+        $this->setRadar($field, number_format((float) $value, 2, '.', ''));
+
         return $this;
     }
-
-
-
-
 
     // /**
     //  * 获取并保存支付管理类

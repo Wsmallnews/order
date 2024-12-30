@@ -12,10 +12,6 @@ interface GetPipeInterface
 {
     /**
      * 项目获取
-     *
-     * @param OrderRocket $rocket
-     * @param Closure $next
-     * @return OrderRocket
      */
     public function get(OrderRocket $rocket, Closure $next): OrderRocket;
 }

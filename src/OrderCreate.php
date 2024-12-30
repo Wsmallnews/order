@@ -2,25 +2,19 @@
 
 namespace Wsmallnews\Order;
 
-use Illuminate\Support\Facades\{
-    Auth,
-    DB,
-    Pipeline,
-};
-use Wsmallnews\Order\{
-    Contracts\Shortcuts\ShortcutInterface,
-    Exceptions\OrderCreateException,
-    Models\Order,
-    Enums\Order\Status as OrderStatus,
-    Enums\Order\PayStatus,
-    Enums\Order\RefundStatus,
-    Enums\Order\DeliveryStatus,
-};
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Pipeline;
+use Wsmallnews\Order\Contracts\Shortcuts\ShortcutInterface;
+use Wsmallnews\Order\Enums\Order\DeliveryStatus;
+use Wsmallnews\Order\Enums\Order\PayStatus;
+use Wsmallnews\Order\Enums\Order\RefundStatus;
+use Wsmallnews\Order\Enums\Order\Status as OrderStatus;
+use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\Models\Order;
 use Wsmallnews\Support\Exceptions\SupportException;
 
 class OrderCreate
 {
-
     public $rocket = null;
 
     /**
@@ -30,14 +24,12 @@ class OrderCreate
      */
     public $params = [];
 
-
     public $calc_type = 'create';
 
     /**
      * @var ShortcutInterface
      */
     public $shortcut = null;
-
 
     // // public $money = 0;
 
@@ -64,32 +56,28 @@ class OrderCreate
         $this->user = $user;
 
     }
-    
-    
+
     public function setParams($params)
     {
         $this->params = $params;
 
         // 生成本次请求唯一标识
         $this->request_identify = md5(client_unique() . ':' . time() . ':' . ($this->user ? $this->user->id : 0) . ':' . json_encode($params));
-        
+
         return $this;
     }
-
 
     /**
      * 设置 shortcut
      *
-     * @param ShortcutInterface $shortcut
      * @return void
      */
     public function setShortcut(ShortcutInterface $shortcut)
     {
         $this->shortcut = $shortcut;
+
         return $this;
     }
-
-
 
     // public function setProducts($products): OrderCreate
     // {
@@ -98,15 +86,13 @@ class OrderCreate
     //     return $this;
     // }
 
-
-
     public function start($products = [])
     {
         // if ($products) {
         //     $this->setProducts($products);
         // }
 
-        $this->rocket = (new OrderRocket())->setRadars([
+        $this->rocket = (new OrderRocket)->setRadars([
             'user' => $this->user,
             'calc_type' => $this->calc_type,
             'request_identify' => $this->request_identify,
@@ -124,9 +110,6 @@ class OrderCreate
             });
     }
 
-
-
-
     public function check()
     {
         // 获取 pipes
@@ -139,9 +122,6 @@ class OrderCreate
                 return $rocket;
             });
     }
-
-
-
 
     public function calcAmount()
     {
@@ -156,7 +136,6 @@ class OrderCreate
             });
     }
 
-
     public function summary()
     {
         // 获取 pipes
@@ -169,9 +148,6 @@ class OrderCreate
                 return $rocket;
             });
     }
-
-
-
 
     /**
      * 计算订单
@@ -197,8 +173,6 @@ class OrderCreate
         return $this->rocket;
     }
 
-
-
     /**
      * 获取订单可用优惠券
      *
@@ -209,7 +183,6 @@ class OrderCreate
     //     $this->calc_type = $calc_type;
     //     // 检查系统必要条件
     //     // check_env(['bcmath', 'queue']);
-
 
     //     $this->start();
 
@@ -226,12 +199,10 @@ class OrderCreate
     //     return $couponCalcManager->getCoupons();
     // }
 
-
-
     public function create($rocket)
     {
         try {
-            DB::transaction(function() use ($rocket) {
+            DB::transaction(function () use ($rocket) {
                 // 获取 pipes
                 $creatingPipes = $this->shortcut->getCreatingPipes();
 
@@ -271,14 +242,11 @@ class OrderCreate
         return $order;
     }
 
-
-
-
     public function saveOrder(OrderRocket $rocket)
     {
         $radars = $rocket->getRadars();
 
-        $order = new Order();
+        $order = new Order;
 
         // $order->scope_type = $this->scope_type;
         // $order->store_id = $this->store_id;
@@ -291,7 +259,7 @@ class OrderCreate
         $order->original_amount_fields = $radars['original_amount_fields'];
         // [product_amount, delivery_amount, product_attribute_amount]
         $order->amount_fields = $radars['amount_fields'];
-        
+
         $order->relate_original_amount = $radars['relate_original_amount'];
         $order->relate_amount = $radars['relate_amount'];
 
@@ -330,8 +298,6 @@ class OrderCreate
         // 重新查询订单
         $order = Order::findOrFail($order->id);
 
-
-
         // $invoice_status = 0;    // 没有申请
         // if ($result['invoice_status'] && $this->invoice_id) {
         //     // 可开具，并且申请了
@@ -341,8 +307,6 @@ class OrderCreate
         //     $invoice_status = -1;
         // }
         // $ext['invoice_status'] = $invoice_status;        // 可开具发票，并且申请了
-
-
 
         // $orderData['ext'] = $payloads['ext_fields'] ?? [];
         // $orderData['platform'] = request()->header('platform');
@@ -359,19 +323,17 @@ class OrderCreate
         return $order;
     }
 
-
-
     /**
      * 添加收货地址信息
      *
-     * @param \think\Model $order
-     * @param array $result
+     * @param  \think\Model  $order
+     * @param  array  $result
      * @return void
      */
     private function saveOrderAddress($order, $user_address)
     {
         // 保存收货地址
-        $orderAddress = new Address();
+        $orderAddress = new Address;
         $orderAddress->order_id = $order->id;
         $orderAddress->user_id = $this->user ? $this->user->id : 0;
         $orderAddress->consignee = $user_address->consignee;
