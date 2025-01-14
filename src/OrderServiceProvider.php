@@ -17,6 +17,8 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Wsmallnews\Order\Commands\OrderCommand;
 use Wsmallnews\Order\Components\Confirm;
+use Wsmallnews\Order\Models\Order as OrderModel;
+use Wsmallnews\Order\Models\OrderItem as OrderItem;
 use Wsmallnews\Order\Testing\TestsOrder;
 
 class OrderServiceProvider extends PackageServiceProvider
@@ -67,7 +69,8 @@ class OrderServiceProvider extends PackageServiceProvider
     {
         // 注册模型别名
         Relation::enforceMorphMap([
-            static::$name => 'Wsmallnews\Comment\Models\Order',
+            'sn_order' => OrderModel::class,
+            'sn_order_item' => OrderItem::class,
         ]);
 
         // Asset Registration
@@ -156,7 +159,8 @@ class OrderServiceProvider extends PackageServiceProvider
     protected function getMigrations(): array
     {
         return [
-            'create_sn_order_table',
+            'create_sn_orders_table',
+            'create_sn_order_items_table',
         ];
     }
 }
