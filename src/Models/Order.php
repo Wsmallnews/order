@@ -3,13 +3,19 @@
 namespace Wsmallnews\Order\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Wsmallnews\Order\Enums;
 use Wsmallnews\Support\Casts\MoneyCast;
 use Wsmallnews\Support\Models\SupportModel;
+use Wsmallnews\Pay\Contracts\PayableInterface;
 
-class Order extends SupportModel
+class Order extends SupportModel implements PayableInterface
 {
+    use SoftDeletes;
+    use Traits\Payable;
+
     protected $table = 'sn_orders';
 
     protected $guarded = [];
@@ -41,16 +47,42 @@ class Order extends SupportModel
         'paid_at' => 'timestamp',
     ];
 
-    // protected function childrenNum(): Attribute
-    // {
-    //     $children = $this->children;
-    //     return Attribute::make(
-    //         get: fn () => $children->count(),
-    //     );
-    // }
 
-    public function user(): BelongsTo
+
+    /**
+     * 记录操作日志时，将下面字段计入 json 中
+     *
+     * @param self $order
+     * @return array
+     */
+    public function getStatusFields($order): array
     {
-        return $this->belongsTo(config('sn-order.user_model'), 'user_id');
+        return [
+            'pay_status' => $order->pay_status,
+            'delivery_status' => $order->delivery_status,
+            'refund_status' => $order->refund_status,
+        ];
+    }
+
+
+    /**
+     * buyer 购买人信息
+     * 
+     * @return MorphTo
+     */
+    public function buyer(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+
+    /**
+     * items 
+     *
+     * @return HasMany
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class, 'order_id');
     }
 }

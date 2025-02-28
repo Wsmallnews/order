@@ -1,5 +1,4 @@
 @php
-    use Wsmallnews\Delivery\Components\UserAddress;
     $assetsUrl = config('filesystems.disks.' . config('filament.default_filesystem_disk') . '.url') . '/';
 
     $userAddressColumns = [
@@ -13,7 +12,7 @@
 
     <div class="w-full flex flex-wrap lg:flex-nowrap mx-auto p-4 bg-white">
         <div class="flex-1 mb-4 lg:mr-4">
-            <livewire:sn-delivery-user-address type="choose" :columns="$userAddressColumns" />
+            <livewire:sn-user-address type="choose" :columns="$userAddressColumns" />
 
             <div class="w-full rounded-lg bg-white p-4">
                 @foreach($relate_items as $key => $item)

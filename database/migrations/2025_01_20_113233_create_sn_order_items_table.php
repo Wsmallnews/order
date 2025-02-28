@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('scope_type', 20)->nullable()->comment('范围类型');
             $table->unsignedBigInteger('scope_id')->default(0)->comment('范围');
             $table->unsignedBigInteger('order_id')->default(0)->comment('订单');
-            $table->unsignedBigInteger('user_id')->default(0)->comment('用户');
-
+            $table->morphs('buyer');
             $table->string('relate_type', 20)->comment('关联类型');
             $table->unsignedBigInteger('relate_id')->default(0)->comment('关联');
             $table->string('relate_title')->nullable()->comment('关联标题');
@@ -92,8 +91,6 @@ return new class extends Migration
             $table->index('scope_type');
             $table->index('scope_id');
             $table->index('order_id');
-            $table->index('user_id');
-
         });
     }
 

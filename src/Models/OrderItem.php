@@ -2,6 +2,7 @@
 
 namespace Wsmallnews\Order\Models;
 
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Wsmallnews\Order\Enums;
 use Wsmallnews\Support\Casts\MoneyCast;
 use Wsmallnews\Support\Models\SupportModel;
@@ -37,13 +38,38 @@ class OrderItem extends SupportModel
         // Enum
         'pay_status' => Enums\Item\PayStatus::class,
         'refund_status' => Enums\Item\RefundStatus::class,
-        'evaluate_status' => Enums\Item\EvaluateStatus::class,
         'delivery_status' => Enums\Item\DeliveryStatus::class,
         'aftersale_status' => Enums\Item\AftersaleStatus::class,
+        'evaluate_status' => Enums\Item\EvaluateStatus::class,
     ];
 
-    public function user()
+
+    /**
+     * 记录操作日志时，将下面字段计入 json 中
+     *
+     * @param self $orderItem
+     * @return array
+     */
+    public function getStatusFields($orderItem): array
     {
-        return $this->belongsTo(config('sn-order.user_model'), 'user_id');
+        return [
+            'pay_status' => $orderItem->pay_status,
+            'refund_status' => $orderItem->refund_status,
+            'delivery_status' => $orderItem->delivery_status,
+            'aftersale_status' => $orderItem->aftersale_status,
+            'evaluate_status' => $orderItem->evaluate_status,
+        ];
+    }
+
+
+
+    /**
+     * buyer 购买人信息
+     * 
+     * @return MorphTo
+     */
+    public function buyer(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

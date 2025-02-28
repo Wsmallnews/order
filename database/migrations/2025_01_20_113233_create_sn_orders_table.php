@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('scope_id')->default(0)->comment('范围');
             $table->string('type', 20)->comment('订单类型');
             $table->string('order_sn', 60)->unique()->comment('订单号');
-            $table->unsignedBigInteger('user_id')->default(0)->comment('用户');
+            $table->morphs('buyer');
             $table->json('original_amount_fields')->nullable()->comment('原费用集合');
             $table->json('amount_fields')->nullable()->comment('现费用集合');
             $table->unsignedInteger('relate_original_amount')->default(0)->comment('原项目总金额');
@@ -46,7 +46,7 @@ return new class extends Migration
             $table->softDeletes();
             $table->index('scope_type');
             $table->index('scope_id');
-            $table->index('user_id');
+            $table->index('type');
             $table->index('status');
         });
     }

@@ -162,6 +162,7 @@ class OrderServiceProvider extends PackageServiceProvider
         return [
             '2025_01_20_113233_create_sn_order_items_table',
             '2025_01_20_113233_create_sn_orders_table',
+            '2025_02_27_141129_create_sn_order_actions_table',
         ];
     }
 }

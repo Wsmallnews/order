@@ -2,28 +2,29 @@
 
 namespace Wsmallnews\Order;
 
+use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Support\Rocket;
 
 class OrderRocket extends Rocket
 {
     /**
-     * 获取当前用户
+     * 获取当前购买者
      *
-     * @return mixed
+     * @return BuyerInterface|null
      */
-    public function getUser()
+    public function getBuyer(): ?BuyerInterface
     {
-        return $this->getRadar('user');
+        return $this->getRadar('buyer');
     }
 
     /**
      * 设置当前用户
      *
-     * @param  \think\Model  $user
+     * @param  BuyerInterface  $buyer
      */
-    public function setUser($user): Rocket
+    public function setBuyer($buyer): Rocket
     {
-        $this->mergeRadars(['user' => $user]);
+        $this->mergeRadars(['buyer' => $buyer]);
 
         return $this;
     }

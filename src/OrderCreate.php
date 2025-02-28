@@ -4,6 +4,7 @@ namespace Wsmallnews\Order;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Pipeline;
+use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\Contracts\Shortcuts\ShortcutInterface;
 use Wsmallnews\Order\Enums\Order\DeliveryStatus;
 use Wsmallnews\Order\Enums\Order\PayStatus;
@@ -40,11 +41,11 @@ class OrderCreate
 
     // // public $goodsList = [];
 
-    public $user = null;
+    public ?BuyerInterface $buyer = null;
 
     public $request_identify = '';
 
-    public function __construct($order_type, $user)
+    public function __construct($order_type, $buyer)
     {
         // $params['store_id'] = $params['store_id'] ?? 0;
         // $params['scope_type'] = $params['store_id'] ? 'store' : 'shop';
@@ -53,8 +54,7 @@ class OrderCreate
         // $this->store_id = $params['store_id'];
         // $this->scope_type = $params['scope_type'];
 
-        $this->user = $user;
-
+        $this->buyer = $buyer;
     }
 
     public function setParams($params)
@@ -62,7 +62,7 @@ class OrderCreate
         $this->params = $params;
 
         // 生成本次请求唯一标识
-        $this->request_identify = md5(client_unique() . ':' . time() . ':' . ($this->user ? $this->user->id : 0) . ':' . json_encode($params));
+        $this->request_identify = md5(client_unique() . ':' . time() . ':' . ($this->buyer ? $this->buyer->morphType() . ':' . $this->buyer->morphId() : 'anonymous:0') . ':' . json_encode($params));
 
         return $this;
     }
@@ -93,7 +93,7 @@ class OrderCreate
         // }
 
         $this->rocket = (new OrderRocket)->setRadars([
-            'user' => $this->user,
+            'buyer' => $this->buyer,
             'calc_type' => $this->calc_type,
             'request_identify' => $this->request_identify,
             'order_type' => $this->order_type,
@@ -252,8 +252,9 @@ class OrderCreate
         // $order->store_id = $this->store_id;
         $order->type = $this->order_type;
 
-        $order->order_sn = get_sn($this->user ? $this->user->id : 0);
-        $order->user_id = $this->user ? $this->user->id : 0;
+        $order->order_sn = get_sn($this->buyer ? $this->buyer->id : 0);
+        $order->buyer_type = $this->buyer?->morphType() ?? 'anonymous';
+        $order->buyer_id = $this->buyer?->morphId() ?? 0;
 
         // [original_product_amount, original_delivery_amount, original_product_attribute_amount]
         $order->original_amount_fields = $radars['original_amount_fields'];

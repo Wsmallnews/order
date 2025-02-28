@@ -8,6 +8,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
+use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\OrderCreate;
 use Wsmallnews\Order\OrderRocket;
 use Wsmallnews\Order\Shortcuts\Shop as ShopShortcut;
@@ -21,7 +22,7 @@ class Confirm extends Component implements HasActions, HasForms
 
     protected OrderRocket $rocket;
 
-    public ?Model $user = null;
+    public ?BuyerInterface $buyer = null;
 
     public string $order_type = 'product';
 
@@ -48,7 +49,7 @@ class Confirm extends Component implements HasActions, HasForms
 
     public function boot()
     {
-        $this->orderCreate = new OrderCreate($this->order_type, $this->user);
+        $this->orderCreate = new OrderCreate($this->order_type, $this->buyer);
         $this->orderCreate->setParams([
             'relate_items' => $this->relateItems,
             'address_id' => $this->address_id,
