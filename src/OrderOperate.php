@@ -3,21 +3,17 @@
 namespace Wsmallnews\Order;
 
 use Carbon\Carbon;
-use Wsmallnews\Order\Enums;
 use Wsmallnews\Order\Models\Order as OrderModel;
 use Wsmallnews\Order\Models\OrderAction as OrderActionModel;
 
 class OrderOperate
 {
-
     /**
      * 订单信息
      *
      * @var OrderModel
      */
     protected $order = null;
-
-
 
     // /**
     //  * 当前关系
@@ -33,13 +29,10 @@ class OrderOperate
     //  */
     // protected $relates = null;
 
-
     public function __construct(OrderModel $order)
     {
         $this->order = $order;
     }
-
-
 
     /**
      * 订单创建成功
@@ -66,22 +59,17 @@ class OrderOperate
         //     $this->order->save();
         // }
 
-
         // return $this->order;
     }
 
-
-
     /**
      * 检测并支付 订单剩余应支付金额
-     *
-     * @return OrderModel
      */
     public function checkAndPaid(): OrderModel
     {
         $paid_fee = $this->order->getPaidFee(true);    // 加锁读获取已支付金额
 
-        $remain_pay_fee = bcsub($this->order->pay_fee, (string)$paid_fee, 2);      // 剩余应支付金额
+        $remain_pay_fee = bcsub($this->order->pay_fee, (string) $paid_fee, 2);      // 剩余应支付金额
 
         if ($remain_pay_fee > 0) {
             // 订单部分支付
@@ -112,5 +100,4 @@ class OrderOperate
 
         return $this->order;
     }
-
 }

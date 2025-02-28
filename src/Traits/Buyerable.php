@@ -2,11 +2,4 @@
 
 namespace Wsmallnews\Order\Traits;
 
-use Illuminate\Database\ClassMorphViolationException;
-
-trait Buyerable
-{
-    
-
-
-}
+trait Buyerable {}

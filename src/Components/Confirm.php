@@ -6,7 +6,6 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\OrderCreate;

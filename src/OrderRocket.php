@@ -9,8 +9,6 @@ class OrderRocket extends Rocket
 {
     /**
      * 获取当前购买者
-     *
-     * @return BuyerInterface|null
      */
     public function getBuyer(): ?BuyerInterface
     {

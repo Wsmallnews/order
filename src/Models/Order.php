@@ -2,14 +2,13 @@
 
 namespace Wsmallnews\Order\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Wsmallnews\Order\Enums;
+use Wsmallnews\Pay\Contracts\PayableInterface;
 use Wsmallnews\Support\Casts\MoneyCast;
 use Wsmallnews\Support\Models\SupportModel;
-use Wsmallnews\Pay\Contracts\PayableInterface;
 
 class Order extends SupportModel implements PayableInterface
 {
@@ -47,13 +46,10 @@ class Order extends SupportModel implements PayableInterface
         'paid_at' => 'timestamp',
     ];
 
-
-
     /**
      * 记录操作日志时，将下面字段计入 json 中
      *
-     * @param self $order
-     * @return array
+     * @param  self  $order
      */
     public function getStatusFields($order): array
     {
@@ -64,22 +60,16 @@ class Order extends SupportModel implements PayableInterface
         ];
     }
 
-
     /**
      * buyer 购买人信息
-     * 
-     * @return MorphTo
      */
     public function buyer(): MorphTo
     {
         return $this->morphTo();
     }
 
-
     /**
-     * items 
-     *
-     * @return HasMany
+     * items
      */
     public function orderItems(): HasMany
     {

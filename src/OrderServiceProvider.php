@@ -18,7 +18,7 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Wsmallnews\Order\Commands\OrderCommand;
 use Wsmallnews\Order\Components\Confirm;
 use Wsmallnews\Order\Models\Order as OrderModel;
-use Wsmallnews\Order\Models\OrderItem as OrderItem;
+use Wsmallnews\Order\Models\OrderItem;
 use Wsmallnews\Order\Testing\TestsOrder;
 
 class OrderServiceProvider extends PackageServiceProvider

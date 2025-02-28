@@ -43,12 +43,10 @@ class OrderItem extends SupportModel
         'evaluate_status' => Enums\Item\EvaluateStatus::class,
     ];
 
-
     /**
      * 记录操作日志时，将下面字段计入 json 中
      *
-     * @param self $orderItem
-     * @return array
+     * @param  self  $orderItem
      */
     public function getStatusFields($orderItem): array
     {
@@ -61,12 +59,8 @@ class OrderItem extends SupportModel
         ];
     }
 
-
-
     /**
      * buyer 购买人信息
-     * 
-     * @return MorphTo
      */
     public function buyer(): MorphTo
     {

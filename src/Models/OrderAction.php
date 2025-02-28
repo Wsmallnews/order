@@ -3,7 +3,6 @@
 namespace Wsmallnews\Order\Models;
 
 use Wsmallnews\Order\Enums;
-use Wsmallnews\Support\Casts\MoneyCast;
 use Wsmallnews\Support\Models\SupportModel;
 
 class OrderAction extends SupportModel
@@ -22,15 +21,12 @@ class OrderAction extends SupportModel
         'order_status' => Enums\Order\Status::class,
     ];
 
-
-
-
     public static function add(Order $order, ?OrderItem $orderItem = null, $message = '', $options = [])
     {
         // $operator = Operator::get();                // 自动获取操作人
         $operator = ['type' => 'user', 'id' => 1];
 
-        $action = new self();
+        $action = new self;
 
         $action->scope_type = $order->scope_type;
         $action->scope_id = $order->scope_id;
@@ -46,12 +42,11 @@ class OrderAction extends SupportModel
         $action->item_status_fields = $orderItem?->getStatusFields($orderItem);         // 订单Item状态集合
         $action->message = $message;
         $action->options = array_merge([
-            'operator' => $operator
+            'operator' => $operator,
         ], $options);
 
         $action->save();
 
         return $action;
     }
-
 }
