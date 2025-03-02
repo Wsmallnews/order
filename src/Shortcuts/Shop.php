@@ -195,19 +195,20 @@ class Shop implements ShortcutInterface
         $radars = $rocket->getRadars();
         $products = $radars['relate_items'];
         $order = $radars['order'];
-        $user = $radars['user'];
+        $buyer = $rocket->getBuyer();
 
-        // $store_id = $rocket->getParam('store_id', 0);
-        // $scope_type = $rocket->getParam('scope_type', 'shop');
+        $scope_type = $rocket->getParam('scope_type', 'default');
+        $scope_id = $rocket->getParam('scope_id', 0);
 
         // 添加 订单 商品
         foreach ($products as $key => $buyInfo) {
             $orderItem = new OrderItem;
 
-            // $orderItem->scope_type = $scope_type;
-            // $orderItem->store_id = $store_id;
+            $orderItem->scope_type = $scope_type;
+            $orderItem->scope_id = $scope_id;
             $orderItem->order_id = $order->id;
-            $orderItem->user_id = $user ? $user->id : 0;
+            $orderItem->buyer_type = $buyer?->morphType() ?? 'anonymous';
+            $orderItem->buyer_id = $buyer?->morphId() ?? 0;
 
             $orderItem->relate_type = $buyInfo['relate_type'];
             $orderItem->relate_id = $buyInfo['relate_id'];
@@ -259,7 +260,7 @@ class Shop implements ShortcutInterface
         }
 
         // 重新查询 订单商品
-        $orderItems = OrderItem::where('order_id', $order->id)->get();
+        $orderItems = OrderItem::scopeable($scope_type, $scope_id)->where('order_id', $order->id)->get();
 
         $rocket->setRadar('order_items', $orderItems);
 
@@ -325,7 +326,7 @@ class Shop implements ShortcutInterface
     // public function failBack(OrderRocket $rocket): void
     // {
     //     $store_id = $rocket->getParam('store_id', 0);
-    //     $scope_type = $rocket->getParam('scope_type', 'shop');
+    //     $scope_type = $rocket->getParam('scope_type', 'default');
     //     $request_identify = $rocket->getRadar('request_identify', '');
 
     //     // 删除锁定的商品库存

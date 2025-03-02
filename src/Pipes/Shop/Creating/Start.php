@@ -11,7 +11,7 @@ class Start implements CreatingPipeInterface
 {
     public function creating(OrderRocket $rocket, Closure $next): OrderRocket
     {
-        $user = $rocket->getRadar('user');
+        $buyer = $rocket->getBuyer();
 
         $response = $next($rocket);
 

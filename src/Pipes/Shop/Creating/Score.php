@@ -13,16 +13,19 @@ class Score implements CreatingPipeInterface
     {
         $score_amount = intval($rocket->getPayload('score_amount', 0));
 
-        $user = $rocket->getRadar('user');
+        $buyer = $rocket->getBuyer();
         // $user = User::findOrFail($user['id']);          // @sn todo 重新查询用户
 
         // 如果需要支付积分
         if ($score_amount) {
             // 判断个人积分是否充足
-            if ($user->score < $score_amount) {
-                // 积分不足
-                throw (new OrderCreateException('用户积分不足'))->setRocket($rocket);
-            }
+
+            // 通过用户扣减积分
+
+            // if ($user->score < $score_amount) {
+            //     // 积分不足
+            //     throw (new OrderCreateException('用户积分不足'))->setRocket($rocket);
+            // }
         }
 
         $response = $next($rocket);

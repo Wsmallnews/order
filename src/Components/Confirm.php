@@ -6,13 +6,13 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Livewire\Component;
 use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\OrderCreate;
 use Wsmallnews\Order\OrderRocket;
 use Wsmallnews\Order\Shortcuts\Shop as ShopShortcut;
+use Wsmallnews\Support\Components\BaseComponent;
 
-class Confirm extends Component implements HasActions, HasForms
+class Confirm extends BaseComponent implements HasActions, HasForms
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -50,6 +50,7 @@ class Confirm extends Component implements HasActions, HasForms
     {
         $this->orderCreate = new OrderCreate($this->order_type, $this->buyer);
         $this->orderCreate->setParams([
+            ...$this->getScopeInfo(),
             'relate_items' => $this->relateItems,
             'address_id' => $this->address_id,
             'coupon_id' => $this->coupon_id,

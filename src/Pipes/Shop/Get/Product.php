@@ -13,7 +13,7 @@ class Product implements GetPipeInterface
 {
     public function get(OrderRocket $rocket, Closure $next): OrderRocket
     {
-        $scope_type = $rocket->getParam('scope_type', 'shop');
+        $scope_type = $rocket->getParam('scope_type', 'default');
         $scope_id = $rocket->getParam('scope_id', 0);
 
         $products = $rocket->getRelateItems();
@@ -25,7 +25,7 @@ class Product implements GetPipeInterface
             // }, 'package_relates.children'])->show();
 
             // 这里多个店铺不能共用一个商品
-            // $product->scopeInfo($scope_type, $scope_id);
+            $product->scopeable($scope_type, $scope_id);
 
             // @sn todo 这里要考虑如何写 transformer
             $product = $product->findOrFail($buyInfo['product_id']);

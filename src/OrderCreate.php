@@ -36,23 +36,13 @@ class OrderCreate
 
     public $order_type = 'product';
 
-    // public $scope_type = 'shop';
-    // public $store_id = 0;
-
-    // // public $goodsList = [];
-
     public ?BuyerInterface $buyer = null;
 
     public $request_identify = '';
 
     public function __construct($order_type, $buyer)
     {
-        // $params['store_id'] = $params['store_id'] ?? 0;
-        // $params['scope_type'] = $params['store_id'] ? 'store' : 'shop';
-
         $this->order_type = $order_type;
-        // $this->store_id = $params['store_id'];
-        // $this->scope_type = $params['scope_type'];
 
         $this->buyer = $buyer;
     }
@@ -77,6 +67,31 @@ class OrderCreate
         $this->shortcut = $shortcut;
 
         return $this;
+    }
+
+
+    /**
+     * 计算订单
+     *
+     * @return OrderRocket
+     */
+    public function calc($calc_type = 'calc')
+    {
+        $this->calc_type = $calc_type;
+        // 检查系统必要条件
+        // check_env(['bcmath', 'queue']);
+
+        $this->start();
+
+        $this->check();
+
+        // 计算订单各种费用
+        $this->calcAmount();
+
+        // summary
+        $this->summary();
+
+        return $this->rocket;
     }
 
     // public function setProducts($products): OrderCreate
@@ -149,29 +164,6 @@ class OrderCreate
             });
     }
 
-    /**
-     * 计算订单
-     *
-     * @return OrderRocket
-     */
-    public function calc($calc_type = 'calc')
-    {
-        $this->calc_type = $calc_type;
-        // 检查系统必要条件
-        // check_env(['bcmath', 'queue']);
-
-        $this->start();
-
-        $this->check();
-
-        // 计算订单各种费用
-        $this->calcAmount();
-
-        // summary
-        $this->summary();
-
-        return $this->rocket;
-    }
 
     /**
      * 获取订单可用优惠券
@@ -248,8 +240,8 @@ class OrderCreate
 
         $order = new Order;
 
-        // $order->scope_type = $this->scope_type;
-        // $order->store_id = $this->store_id;
+        $order->scope_type = $this->params['scope_type'];
+        $order->scope_id = $this->params['scope_id'];
         $order->type = $this->order_type;
 
         $order->order_sn = get_sn($this->buyer ? $this->buyer->id : 0);

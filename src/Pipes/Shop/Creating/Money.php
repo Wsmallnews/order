@@ -13,12 +13,12 @@ class Money implements CreatingPipeInterface
     {
         $money = floatval($rocket->getParam('money', 0));         // 用户选择余额抵扣金额
 
-        $user = $rocket->getRadar('user');
+        $buyer = $rocket->getBuyer();
         // $user = User::findOrFail($user['id']);          // @sn todo 重新查询用户
 
         if ($money) {
             // 判断个人余额是否充足
-            if ($user->money < $money) {
+            if ($buyer->money < $money) {
                 // 余额不足
                 throw (new OrderCreateException('用户余额不足'))->setRocket($rocket);
             }

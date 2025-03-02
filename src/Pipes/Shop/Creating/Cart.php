@@ -10,17 +10,17 @@ class Cart implements CreatingPipeInterface
 {
     public function creating(OrderRocket $rocket, Closure $next): OrderRocket
     {
-        $user = $rocket->getRadar('user', null);
+        $buyer = $rocket->getBuyer();
         $from = $rocket->getParam('from', 'detail');         // cart=从购物车下单， detail=从商品详情下单
         $scope_id = $rocket->getParam('scope_id', 0);
-        $scope_type = $rocket->getParam('scope_type', 'shop');
+        $scope_type = $rocket->getParam('scope_type', 'default');
 
         $response = $next($rocket);
 
         // ==============================后置 所有中间件走完之后，再计算=============================
 
         // $relates
-        if ($from == 'cart' && $user) {
+        if ($from == 'cart' && $buyer) {
             // $relates = $rocket->getPayload('order_relates', []);
             // $relate_type = $rocket->getPayload('order_relate_type', 'product');
 

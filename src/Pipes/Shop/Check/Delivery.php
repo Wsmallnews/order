@@ -3,7 +3,7 @@
 namespace Wsmallnews\Order\Pipes\Shop\Check;
 
 use Closure;
-use Wsmallnews\Delivery\Models\UserAddress;
+use Wsmallnews\User\Models\Address as UserAddress;
 use Wsmallnews\Order\Contracts\Pipes\CheckPipeInterface;
 use Wsmallnews\Order\Exceptions\OrderCreateException;
 use Wsmallnews\Order\OrderRocket;
@@ -34,7 +34,7 @@ class Delivery implements CheckPipeInterface
             $need_address = 1;
             // 用户收货地址
             if ($address_id) {
-                $user = $rocket->getUser();
+                $user = $rocket->getBuyer();
                 $userAddress = UserAddress::where('user_id', ($user ? $user->id : 0))->find($rocket->getParam('address_id'));
             } else {
                 // 获取默认收货地址
