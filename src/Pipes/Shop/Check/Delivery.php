@@ -3,10 +3,10 @@
 namespace Wsmallnews\Order\Pipes\Shop\Check;
 
 use Closure;
-use Wsmallnews\User\Models\Address as UserAddress;
 use Wsmallnews\Order\Contracts\Pipes\CheckPipeInterface;
 use Wsmallnews\Order\Exceptions\OrderCreateException;
 use Wsmallnews\Order\OrderRocket;
+use Wsmallnews\User\Models\Address as UserAddress;
 
 class Delivery implements CheckPipeInterface
 {

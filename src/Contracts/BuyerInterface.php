@@ -19,18 +19,10 @@ interface BuyerInterface
      */
     public function morphId(): int;
 
-
     /**
      * 关联订单
-     * 
-     * @return MorphMany
      */
     public function orders(): MorphMany;
 
-
-    /**
-     * 
-     * @return MorphMany
-     */
     public function orderItems(): MorphMany;
 }
