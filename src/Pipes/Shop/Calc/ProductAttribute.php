@@ -23,7 +23,7 @@ class ProductAttribute implements CalcPipeInterface
             // 计算金额和组合属性名称(单份)
             [$current_product_attribute_price, $currentProductAttributeTexts] = $productAttributeManager->buyCalc($buyAttributes);
             // 计算商品数量
-            $current_product_attribute_amount = bcmul($current_product_attribute_price, (string) $relate_num, 2);
+            $current_product_attribute_amount = sn_currency()->multiply($current_product_attribute_price, $relate_num);
 
             // 累计 relate 价格
             $rocket->radarAdditionAmount('relate_original_amount', $current_product_attribute_amount);       // 累计 relate 原始总价
@@ -39,11 +39,12 @@ class ProductAttribute implements CalcPipeInterface
             $buyInfo['product_attribute_texts'] = $currentProductAttributeTexts;                           // 当前商品属性名称
 
             // 将属性的的单价累计到 relate 单价金额上
-            $buyInfo['relate_original_price'] = bcadd($buyInfo['relate_original_price'], (string) $current_product_attribute_price, 2);    // 累计商品原始单价的总和
-            $buyInfo['relate_price'] = bcadd($buyInfo['relate_price'], (string) $current_product_attribute_price, 2);                     // 累计商品现在单价的总和
+            $buyInfo['relate_original_price'] = sn_currency()->add($buyInfo['relate_original_price'], $current_product_attribute_price);    // 累计商品原始单价的总和
+            $buyInfo['relate_price'] = sn_currency()->add($buyInfo['relate_price'], $current_product_attribute_price);                     // 累计商品现在单价的总和
+
             // 将属性金额累计到 relate 金额上
-            $buyInfo['relate_original_amount'] = bcadd($buyInfo['relate_original_amount'], (string) $current_product_attribute_amount, 2);         // 当前relate原始总金额（原价 * 数量）
-            $buyInfo['relate_amount'] = bcadd($buyInfo['relate_amount'], (string) $current_product_attribute_amount, 2);                           // 当前relate总金额（价格 * 数量）
+            $buyInfo['relate_original_amount'] = sn_currency()->add($buyInfo['relate_original_amount'], $current_product_attribute_amount);         // 当前relate原始总金额（原价 * 数量）
+            $buyInfo['relate_amount'] = sn_currency()->add($buyInfo['relate_amount'], $current_product_attribute_amount);                           // 当前relate总金额（价格 * 数量）
 
             // 将费用存到字段集合中，方便后续存库
             $buyInfo['original_amount_fields']['original_product_attribute_amount'] = $current_product_attribute_amount;

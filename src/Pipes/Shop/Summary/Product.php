@@ -31,8 +31,8 @@ class Product implements SummaryPipeInterface
                 'product_type' => $product['type'],
                 'product_sku_price_id' => $currentSkuPrice['id'],
                 'product_sku_text' => $currentSkuPrice['product_sku_text'],
-                'original_product_price' => $currentSkuPrice['original_price'],
-                'product_price' => $currentSkuPrice['price'],
+                'original_product_price' => sn_currency()->formatByDecimal($currentSkuPrice['original_price']),
+                'product_price' => sn_currency()->formatByDecimal($currentSkuPrice['price']),
                 'product_attributes' => $currentSkuPrice['product_sku_text'],
                 'product_sku_type' => $product['sku_type'],
             ]);
@@ -45,35 +45,7 @@ class Product implements SummaryPipeInterface
 
         // ==============================后置 所有中间件走完之后，再计算=============================
 
-        // 设置 payloads
-        $products = $rocket->getRelateItems();
-
-        $formatRelateItems = [];
-        foreach ($products as $key => $buyInfo) {
-            $current = [
-                'relate_type' => $buyInfo['relate_type'],
-                'relate_id' => $buyInfo['relate_id'],
-                'relate_title' => $buyInfo['relate_title'],
-                'relate_subtitle' => $buyInfo['relate_subtitle'],
-                'relate_attributes' => $buyInfo['relate_attributes'],
-                'relate_image' => $buyInfo['relate_image'],
-                'relate_original_price' => $buyInfo['relate_original_price'],
-                'relate_price' => $buyInfo['relate_price'],
-                'relate_original_amount' => $buyInfo['relate_original_amount'],
-                'relate_amount' => $buyInfo['relate_amount'],
-                'relate_stock_num' => $buyInfo['relate_stock_num'],
-                'relate_num' => $buyInfo['relate_num'],
-                'relate_weight' => $buyInfo['relate_weight'],
-                'stock_type' => $buyInfo['stock_type'],
-                'stock_unit' => $buyInfo['stock_unit'],
-            ];
-
-            $formatRelateItems[] = $current;
-        }
-
-        $rocket->mergePayloads([
-            'relate_items' => $formatRelateItems,
-        ]);
+        
 
         return $response;
     }

@@ -192,8 +192,9 @@ class Shop implements ShortcutInterface
      */
     public function save(OrderRocket $rocket): Collection
     {
+        $payloads = $rocket->getPayloads();
         $radars = $rocket->getRadars();
-        $products = $radars['relate_items'];
+        $relateItems = $payloads['relate_items'];
         $order = $radars['order'];
         $buyer = $rocket->getBuyer();
 
@@ -201,7 +202,7 @@ class Shop implements ShortcutInterface
         $scope_id = $rocket->getParam('scope_id', 0);
 
         // 添加 订单 商品
-        foreach ($products as $key => $buyInfo) {
+        foreach ($relateItems as $key => $relateItem) {
             $orderItem = new OrderItem;
 
             $orderItem->scope_type = $scope_type;
@@ -210,51 +211,52 @@ class Shop implements ShortcutInterface
             $orderItem->buyer_type = $buyer?->morphType() ?? 'anonymous';
             $orderItem->buyer_id = $buyer?->morphId() ?? 0;
 
-            $orderItem->relate_type = $buyInfo['relate_type'];
-            $orderItem->relate_id = $buyInfo['relate_id'];
-            $orderItem->relate_title = $buyInfo['relate_title'];
-            $orderItem->relate_subtitle = $buyInfo['relate_subtitle'];
-            $orderItem->relate_attributes = $buyInfo['relate_attributes'];
-            $orderItem->relate_image = $buyInfo['relate_image'];
-            $orderItem->relate_original_price = $buyInfo['relate_original_price'];
-            $orderItem->relate_price = $buyInfo['relate_price'];
-            $orderItem->relate_stock_num = $buyInfo['relate_stock_num'];
-            $orderItem->relate_num = $buyInfo['relate_num'];
-            $orderItem->relate_weight = $buyInfo['relate_weight'];
-            $orderItem->relate_sn = $buyInfo['relate_sn'];
+            $orderItem->relate_type = $relateItem['relate_type'];
+            $orderItem->relate_id = $relateItem['relate_id'];
+            $orderItem->relate_title = $relateItem['relate_title'];
+            $orderItem->relate_subtitle = $relateItem['relate_subtitle'];
+            $orderItem->relate_attributes = $relateItem['relate_attributes'];
+            $orderItem->relate_image = $relateItem['relate_image'];
+            $orderItem->relate_original_price = $relateItem['relate_original_price'];
+            $orderItem->relate_price = $relateItem['relate_price'];
+            $orderItem->relate_stock_num = $relateItem['relate_stock_num'];
+            $orderItem->relate_num = $relateItem['relate_num'];
+            $orderItem->relate_weight = $relateItem['relate_weight'];
+            $orderItem->relate_sn = $relateItem['relate_sn'];
 
-            $orderItem->relate_options = $buyInfo['relate_options'] ?? null;     // relate 相关附加字段
+            $orderItem->relate_options = $relateItem['relate_options'] ?? null;     // relate 相关附加字段
 
-            $orderItem->stock_unit = $buyInfo['stock_unit'];
-            $orderItem->stock_type = $buyInfo['stock_type'];
+            $orderItem->stock_unit = $relateItem['stock_unit'];
+            $orderItem->stock_type = $relateItem['stock_type'];
 
-            $orderItem->original_amount_fields = $buyInfo['original_amount_fields'];
-            $orderItem->amount_fields = $buyInfo['amount_fields'];
-            $orderItem->amount = $buyInfo['amount'];
-            $orderItem->score_amount = $buyInfo['score_amount'] ?? 0;
+            $orderItem->original_amount_fields = sn_currency()->formatByDecimal($relateItem['original_amount_fields']);
+            $orderItem->amount_fields = sn_currency()->formatByDecimal($relateItem['amount_fields']);
+            $orderItem->original_amount = $relateItem['original_amount'];
+            $orderItem->amount = $relateItem['amount'];
+            $orderItem->score_amount = $relateItem['score_amount'] ?? 0;
 
-            $orderItem->discount_fields = $buyInfo['discount_fields'] ?? [];
-            $orderItem->discount_amount = $buyInfo['discount_amount'];
-            $orderItem->total_fee = $buyInfo['total_fee'];
-            $orderItem->reonly_fee = $buyInfo['reonly_fee'];
+            $orderItem->discount_fields = sn_currency()->formatByDecimal($relateItem['discount_fields'] ?? []);
+            $orderItem->discount_amount = $relateItem['discount_amount'];
+            $orderItem->total_fee = $relateItem['total_fee'];
+            $orderItem->reonly_fee = $relateItem['reonly_fee'];
 
             $orderItem->pay_status = PayStatus::Unpaid;
-            $orderItem->delivery_type = $buyInfo['delivery_type'];
+            $orderItem->delivery_type = $relateItem['delivery_type'];
 
             $orderItem->delivery_status = DeliveryStatus::WaitingSend;
-            $orderItem->delivery_amount = $buyInfo['delivery_amount'];
+            $orderItem->delivery_amount = $relateItem['delivery_amount'];
 
-            $orderItem->delivery_id = $buyInfo['delivery_id'];
+            $orderItem->delivery_id = $relateItem['delivery_id'];
 
             $orderItem->aftersale_status = AftersaleStatus::Unafter;
             $orderItem->evaluate_status = EvaluateStatus::Unevaluate;
             $orderItem->refund_status = RefundStatus::Unrefund;
-            $orderItem->fields_infos = $buyInfo['fields_infos'];
+            $orderItem->fields_infos = $relateItem['fields_infos'];
 
             $options = [
                 'order_status' => 'normal',          // 刚下单都是正常状态，订单 closed 的时候，会变成 closed 状态
             ];
-            $orderItem->options = array_merge($options, $buyInfo['options'] ?? []);
+            $orderItem->options = array_merge($options, $relateItem['options'] ?? []);
 
             $orderItem->save();
         }

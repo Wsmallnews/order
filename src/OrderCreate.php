@@ -234,7 +234,7 @@ class OrderCreate
 
     public function saveOrder(OrderRocket $rocket)
     {
-        $radars = $rocket->getRadars();
+        $payloads = $rocket->getPayloads();
 
         $order = new Order;
 
@@ -247,29 +247,29 @@ class OrderCreate
         $order->buyer_id = $this->buyer?->morphId() ?? 0;
 
         // [original_product_amount, original_delivery_amount, original_product_attribute_amount]
-        $order->original_amount_fields = $radars['original_amount_fields'];
+        $order->original_amount_fields = sn_currency()->formatByDecimal($payloads['original_amount_fields']);
         // [product_amount, delivery_amount, product_attribute_amount]
-        $order->amount_fields = $radars['amount_fields'];
+        $order->amount_fields = sn_currency()->formatByDecimal($payloads['amount_fields']);
 
-        $order->relate_original_amount = $radars['relate_original_amount'];
-        $order->relate_amount = $radars['relate_amount'];
+        $order->relate_original_amount = $payloads['relate_original_amount'];
+        $order->relate_amount = $payloads['relate_amount'];
 
-        $order->order_amount = $radars['order_amount'];
-        $order->score_amount = $radars['score_amount'] ?? 0;
+        $order->order_amount = $payloads['order_amount'];
+        $order->score_amount = $payloads['score_amount'] ?? 0;
 
         $order->remark = $this->params['remark'] ?? null;
 
         $order->status = OrderStatus::Unpaid;
 
         // 订单总优惠金额
-        $order->discount_amount = $radars['discount_amount'];
+        $order->discount_amount = $payloads['discount_amount'];
         // [coupon_discount_fee]
-        $order->discount_fields = $radars['discount_fields'];
+        $order->discount_fields = sn_currency()->formatByDecimal($payloads['discount_fields']);
 
         // 订单应支付金额
-        $order->pay_fee = $radars['pay_fee'];
-        $order->original_pay_fee = $radars['pay_fee'];
-        $order->remain_pay_fee = $radars['pay_fee'];
+        $order->pay_fee = $payloads['pay_fee'];
+        $order->original_pay_fee = $payloads['pay_fee'];
+        $order->remain_pay_fee = $payloads['pay_fee'];
 
         $order->pay_status = PayStatus::Unpaid;
 
@@ -277,7 +277,7 @@ class OrderCreate
         $order->delivery_status = DeliveryStatus::WaitingSend;
         $order->refund_status = RefundStatus::Unrefund;
 
-        $order->fields_infos = $radars['fields_infos'];
+        $order->fields_infos = $payloads['fields_infos'];
 
         $options = [];
         $order->options = array_merge($options, $radars['options'] ?? []);

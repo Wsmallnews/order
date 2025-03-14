@@ -61,6 +61,7 @@ return new class extends Migration
             $table->json('original_amount_fields')->nullable()->comment('原费用集合');
             $table->json('amount_fields')->nullable()->comment('现费用集合');
 
+            $table->unsignedInteger('original_amount')->default(0)->comment('原始总金额(含运费)');
             $table->unsignedInteger('amount')->default(0)->comment('总金额(含运费)');
             $table->unsignedInteger('score_amount')->default(0)->comment('积分总数');
 

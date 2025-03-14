@@ -49,6 +49,7 @@ class Start implements CalcPipeInterface
             // 总计，包含 relate 费用，运费等
             $buyInfo['original_amount'] = '0';                    // 原始总价 (原始总计 + 原始运费等等)
             $buyInfo['amount'] = '0';                             // 总价(总计 + 运费等等)
+            $buyInfo['score_amount'] = '0';                             // 总价(总计 + 运费等等)
 
             // 配送费有字段单独记录
             $buyInfo['delivery_amount'] = '0';                             // 配送费
@@ -80,24 +81,18 @@ class Start implements CalcPipeInterface
             $discountFields = $buyInfo['discount_fields'];
 
             // 原始总计
-            foreach ($originalAmountFields as $key => $amount_field) {
-                $buyInfo['original_amount'] = bcadd($buyInfo['original_amount'], (string) $amount_field, 2);
-            }
+            $buyInfo['original_amount'] = sn_currency()->add($buyInfo['original_amount'], ...$originalAmountFields);
 
             // 总计
-            foreach ($amountFields as $key => $amount_field) {
-                $buyInfo['amount'] = bcadd($buyInfo['amount'], (string) $amount_field, 2);
-            }
+            $buyInfo['amount'] = sn_currency()->add($buyInfo['amount'], ...$amountFields);
 
             // 优惠总计
-            foreach ($discountFields as $key => $discount_field) {
-                $buyInfo['discount_amount'] = bcadd($buyInfo['discount_amount'], (string) $discount_field, 2);
-            }
+            $buyInfo['discount_amount'] = sn_currency()->add($buyInfo['discount_amount'], ...$discountFields);
 
             // total_fee = 总费用 - 总优惠； pay_fee = (总费用 - 配送费) - 总优惠
-            $buyInfo['reonly_fee'] = $buyInfo['total_fee'] = bcsub($buyInfo['amount'], $buyInfo['discount_amount'], 2);
+            $buyInfo['reonly_fee'] = $buyInfo['total_fee'] = sn_currency()->subtract($buyInfo['amount'], $buyInfo['discount_amount']);
             if (isset($buyInfo['delivery_amount'])) {
-                $buyInfo['reonly_fee'] = bcsub($buyInfo['total_fee'], (string) $buyInfo['delivery_amount'], 2);
+                $buyInfo['reonly_fee'] = sn_currency()->subtract($buyInfo['total_fee'], $buyInfo['delivery_amount']);
             }
         }
         $rocket->setRelateItems($relateItems);
@@ -128,8 +123,9 @@ class Start implements CalcPipeInterface
         }
 
         // 计算订单应支付金额
-        $pay_fee = bcsub($rocket->getRadar('order_amount'), $rocket->getPayload('discount_amount'), 2);
-        $pay_fee = $pay_fee < 0 ? 0 : $pay_fee;
+        $pay_fee = sn_currency()->subtract($rocket->getRadar('order_amount'), $rocket->getRadar('discount_amount'));
+        $pay_fee = sn_currency()->isNegative($pay_fee) ? 0 : $pay_fee;      // pay_fee 不能小于 0
+
         $rocket->radarAdditionAmount('pay_fee', $pay_fee);
 
         return $response;

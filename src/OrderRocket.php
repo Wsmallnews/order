@@ -9,6 +9,8 @@ class OrderRocket extends Rocket
 {
     /**
      * 获取当前购买者
+     * 
+     * @return ?BuyerInterface
      */
     public function getBuyer(): ?BuyerInterface
     {
@@ -19,6 +21,7 @@ class OrderRocket extends Rocket
      * 设置当前用户
      *
      * @param  BuyerInterface  $buyer
+     * @return Rocket
      */
     public function setBuyer($buyer): Rocket
     {
@@ -32,7 +35,7 @@ class OrderRocket extends Rocket
      *
      * @return string
      */
-    public function getCalcType()
+    public function getCalcType(): string
     {
         return $this->getRadar('calc_type');
     }
@@ -41,6 +44,7 @@ class OrderRocket extends Rocket
      * 设置当前计算类型
      *
      * @param  string  $calc_type
+     * @return Rocket
      */
     public function setCalcType($calc_type): Rocket
     {
@@ -50,13 +54,22 @@ class OrderRocket extends Rocket
     }
 
     /**
-     * 获取商品列表
+     * 获取relate列表
+     * 
+     * @return array
      */
     public function getRelateItems(): array
     {
         return $this->getRadar('relate_items', []);
     }
 
+
+    /**
+     * 设置 relate 列表
+     *
+     * @param array $relateItems
+     * @return Rocket
+     */
     public function setRelateItems($relateItems): Rocket
     {
         $data = ['relate_items' => $relateItems];
@@ -65,33 +78,22 @@ class OrderRocket extends Rocket
         return $this;
     }
 
+
+    /**
+     * 累加 radar 中的字段的值
+     *
+     * @param mixed $field
+     * @param mixed $value
+     * @return Rocket
+     */
     public function radarAdditionAmount($field, $value): Rocket
     {
         if ($this->getRadar($field)) {
-            $value = bcadd((string) $this->getRadar($field), (string) $value, 2);
+            $value = sn_currency()->add($this->getRadar($field), $value);
         }
 
-        $this->setRadar($field, number_format((float) $value, 2, '.', ''));
+        $this->setRadar($field, sn_currency()->parseMoney($value));
 
         return $this;
     }
-
-    // /**
-    //  * 获取并保存支付管理类
-    //  *
-    //  * @param \Closure $callback
-    //  * @return PayManager
-    //  */
-    // public function getPayManager(\Closure $callback)
-    // {
-    //     $payManager = $this->getRadar('pay_manager', null);
-    //     if (!$payManager) {
-    //         $payManager = $callback();
-    //         $this->mergeRadars([
-    //             'pay_manager' => $payManager
-    //         ]);
-    //     }
-
-    //     return $payManager;
-    // }
 }

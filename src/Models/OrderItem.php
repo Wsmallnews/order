@@ -27,6 +27,7 @@ class OrderItem extends SupportModel
         'relate_original_price' => MoneyCast::class,
         'relate_price' => MoneyCast::class,
 
+        'original_amount' => MoneyCast::class,
         'amount' => MoneyCast::class,
         'score_amount' => MoneyCast::class,
         'discount_amount' => MoneyCast::class,

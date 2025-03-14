@@ -18,10 +18,10 @@ class Product implements CalcPipeInterface
             $currentSkuPrice = $buyInfo['current_sku_price'];
 
             // 当前商品原始总价
-            $current_original_product_amount = bcmul((string) $product['original_price'], (string) $buyInfo['relate_num'], 2);
+            $current_original_product_amount = sn_currency()->multiply($product['original_price'], $buyInfo['relate_num']);
             $rocket->radarAdditionAmount('relate_original_amount', $current_original_product_amount);       // 累计商品原始总价
 
-            $current_product_amount = bcmul((string) $currentSkuPrice['price'], (string) $buyInfo['relate_num'], 2);
+            $current_product_amount = sn_currency()->multiply($currentSkuPrice['price'], $buyInfo['relate_num']);
             $rocket->radarAdditionAmount('relate_amount', $current_product_amount);       // 累计商品总价
 
             // 商品总总量
@@ -35,10 +35,10 @@ class Product implements CalcPipeInterface
             $buyInfo['product_amount'] = $current_product_amount;                                           // 当前商品总金额（价格 * 数量）
 
             // 商品相关的价格
-            $buyInfo['relate_original_price'] = bcadd($buyInfo['relate_original_price'], (string) $product['original_price'], 2);    // 累计商品原始单价的总和
-            $buyInfo['relate_price'] = bcadd($buyInfo['relate_price'], (string) $currentSkuPrice['price'], 2);                     // 累计商品现在单价的总和
-            $buyInfo['relate_original_amount'] = bcadd($buyInfo['relate_original_amount'], (string) $current_original_product_amount, 2);         // 当前relate原始总金额（原价 * 数量）
-            $buyInfo['relate_amount'] = bcadd($buyInfo['relate_amount'], (string) $current_product_amount, 2);                           // 当前relate总金额（价格 * 数量）
+            $buyInfo['relate_original_price'] = sn_currency()->add($buyInfo['relate_original_price'], $product['original_price']);      // 累计商品原始单价的总和
+            $buyInfo['relate_price'] = sn_currency()->add($buyInfo['relate_price'], $currentSkuPrice['price']);                             // 累计商品现在单价的总和
+            $buyInfo['relate_original_amount'] = sn_currency()->add($buyInfo['relate_original_amount'], $current_original_product_amount);      // 当前relate原始总金额（原价
+            $buyInfo['relate_amount'] = sn_currency()->add($buyInfo['relate_amount'], $current_product_amount);                    // 当前relate总金额（价格 * 数量）
 
             $buyInfo['relate_weight'] = $current_weight;        // 当前商品总重量
             $buyInfo['relate_sn'] = $currentSkuPrice->product_sn;        // 当前商品货号
