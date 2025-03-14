@@ -16,7 +16,6 @@ class Start implements SummaryPipeInterface
 
         $radars = $rocket->getRadars();
 
-
         // 设置 payloads
         $relateItems = $rocket->getRelateItems();
 

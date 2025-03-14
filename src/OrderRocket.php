@@ -9,8 +9,6 @@ class OrderRocket extends Rocket
 {
     /**
      * 获取当前购买者
-     * 
-     * @return ?BuyerInterface
      */
     public function getBuyer(): ?BuyerInterface
     {
@@ -21,7 +19,6 @@ class OrderRocket extends Rocket
      * 设置当前用户
      *
      * @param  BuyerInterface  $buyer
-     * @return Rocket
      */
     public function setBuyer($buyer): Rocket
     {
@@ -32,8 +29,6 @@ class OrderRocket extends Rocket
 
     /**
      * 获取当前计算类型
-     *
-     * @return string
      */
     public function getCalcType(): string
     {
@@ -44,7 +39,6 @@ class OrderRocket extends Rocket
      * 设置当前计算类型
      *
      * @param  string  $calc_type
-     * @return Rocket
      */
     public function setCalcType($calc_type): Rocket
     {
@@ -55,20 +49,16 @@ class OrderRocket extends Rocket
 
     /**
      * 获取relate列表
-     * 
-     * @return array
      */
     public function getRelateItems(): array
     {
         return $this->getRadar('relate_items', []);
     }
 
-
     /**
      * 设置 relate 列表
      *
-     * @param array $relateItems
-     * @return Rocket
+     * @param  array  $relateItems
      */
     public function setRelateItems($relateItems): Rocket
     {
@@ -78,13 +68,11 @@ class OrderRocket extends Rocket
         return $this;
     }
 
-
     /**
      * 累加 radar 中的字段的值
      *
-     * @param mixed $field
-     * @param mixed $value
-     * @return Rocket
+     * @param  mixed  $field
+     * @param  mixed  $value
      */
     public function radarAdditionAmount($field, $value): Rocket
     {

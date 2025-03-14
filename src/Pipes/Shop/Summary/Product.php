@@ -45,8 +45,6 @@ class Product implements SummaryPipeInterface
 
         // ==============================后置 所有中间件走完之后，再计算=============================
 
-        
-
         return $response;
     }
 }
