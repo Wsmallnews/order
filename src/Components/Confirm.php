@@ -39,12 +39,12 @@ class Confirm extends BaseComponent implements HasActions, HasForms
 
     public string $platform = 'web';
 
-    public function mount(array $relateItems, ?string $order_type, ?string $from)
-    {
-        $this->relateItems = $relateItems;
-        $this->order_type = $order_type ?: $this->order_type;
-        $this->from = $from ?: $this->from;
-    }
+    // public function mount(array $relateItems, ?string $order_type, ?string $from)
+    // {
+    //     $this->relateItems = $relateItems;
+    //     $this->order_type = $order_type ?: $this->order_type;
+    //     $this->from = $from ?: $this->from;
+    // }
 
     public function boot()
     {

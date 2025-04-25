@@ -21,7 +21,7 @@ class Product implements SummaryPipeInterface
             $buyInfo['relate_id'] = $product->id;
             $buyInfo['relate_title'] = $product->title;
             $buyInfo['relate_subtitle'] = $product->subtitle;
-            $buyInfo['relate_image'] = $product->image;
+            $buyInfo['relate_image'] = $currentVariant->mainUrl['medium'] ?? $product->mainUrl['medium'];
             $buyInfo['relate_attributes'] = array_merge(($buyInfo['relate_attributes'] ?? []), $currentVariant['product_sku_text']);
             $buyInfo['stock_unit'] = $product['stock_unit'];
             $buyInfo['stock_type'] = $product['stock_type'];
