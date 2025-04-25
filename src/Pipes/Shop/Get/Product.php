@@ -6,7 +6,7 @@ use Closure;
 use Wsmallnews\Order\Contracts\Pipes\GetPipeInterface;
 use Wsmallnews\Order\Exceptions\OrderCreateException;
 use Wsmallnews\Order\OrderRocket;
-use Wsmallnews\Product\Enums\SkuPriceStatus;
+use Wsmallnews\Product\Enums\VariantStatus;
 use Wsmallnews\Product\Models\Product as ProductModel;
 
 class Product implements GetPipeInterface
@@ -19,7 +19,7 @@ class Product implements GetPipeInterface
         $products = $rocket->getRelateItems();
 
         foreach ($products as $key => &$buyInfo) {
-            $product = ProductModel::with(['skuPrices', 'attributes' => function ($query) {
+            $product = ProductModel::with(['variants', 'attributes' => function ($query) {
                 $query->with(['children.attribute_repository', 'attribute_repository']);
             }])->show();
             // }, 'package_relates.children'])->show();
@@ -30,7 +30,7 @@ class Product implements GetPipeInterface
             // @sn todo 这里要考虑如何写 transformer
             $product = $product->findOrFail($buyInfo['product_id']);
 
-            // ->transform('buy', ['sku_prices', 'attributes.children'], [
+            // ->transform('buy', ['variants', 'attributes.children'], [
             //     'scope_type' => $scope_type,
             //     'store_id' => $store_id
             // ]);
@@ -47,20 +47,20 @@ class Product implements GetPipeInterface
         $relateItems = $rocket->getRelateItems();
 
         foreach ($relateItems as $key => &$buyInfo) {
-            $product_sku_price_id = $buyInfo['product_sku_price_id'] ?? 0;
+            $product_variant_id = $buyInfo['product_variant_id'] ?? 0;
 
             $product = $buyInfo['product'];
-            $skuPrices = $product->skuPrices;
+            $variants = $product->variants;
 
-            foreach ($skuPrices as $key => $skuPrice) {
-                if ($skuPrice->id == $product_sku_price_id && $skuPrice->status == SkuPriceStatus::Up) {
-                    $buyInfo['current_sku_price'] = $skuPrice;      // 当前购买规格
+            foreach ($variants as $key => $variant) {
+                if ($variant->id == $product_variant_id && $variant->status == VariantStatus::Up) {
+                    $buyInfo['current_variant'] = $variant;      // 当前购买规格
 
                     break;
                 }
             }
 
-            if (! isset($buyInfo['current_sku_price']) || ! $buyInfo['current_sku_price']) {
+            if (! isset($buyInfo['current_variant']) || ! $buyInfo['current_variant']) {
                 throw (new OrderCreateException('商品规格不存在'))->setRocket($rocket);
             }
         }

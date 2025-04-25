@@ -14,7 +14,7 @@ class ProductAttribute implements SummaryPipeInterface
 
         foreach ($products as $key => &$buyInfo) {
             $product = $buyInfo['product'];
-            $currentSkuPrice = $buyInfo['current_sku_price'];
+            $currentVariant = $buyInfo['current_variant'];
 
             $currentProductAttributeTexts = $buyInfo['product_attribute_texts'];
 

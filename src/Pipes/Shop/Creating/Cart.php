@@ -29,7 +29,7 @@ class Cart implements CreatingPipeInterface
 
             //     foreach ($relates as $relate) {
             //         $cartManager->modifyQueryUsing(function ($query) use ($scope_id, $relate) {
-            //             $query->scopeProduct($relate['product_id'], $relate['product_sku_price_id'], $relate['product_attributes']);     // 产品相关
+            //             $query->scopeProduct($relate['product_id'], $relate['product_variant_id'], $relate['product_attributes']);     // 产品相关
             //         });
 
             //         $cartManager->clear();      // 删除约束下的购物车记录

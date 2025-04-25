@@ -41,8 +41,8 @@ return new class extends Migration
             // product_weight
             // product_sn
             // product_type(未记录)
-            // product_sku_price_id(未记录)
-            // item_product_sku_price_id(未记录)
+            // product_variant_id(未记录)
+            // item_product_variant_id(未记录)
             // product_sku_text(未记录)
             // original_product_price(未记录)
             // product_price(未记录)
