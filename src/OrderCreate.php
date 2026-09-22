@@ -4,6 +4,7 @@ namespace Wsmallnews\Order;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Pipeline;
+use think\Model;
 use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\Contracts\Shortcuts\ShortcutInterface;
 use Wsmallnews\Order\Enums\Order\DeliveryStatus;
@@ -317,7 +318,7 @@ class OrderCreate
     /**
      * 添加收货地址信息
      *
-     * @param  \think\Model  $order
+     * @param  Model  $order
      * @param  array  $result
      * @return void
      */

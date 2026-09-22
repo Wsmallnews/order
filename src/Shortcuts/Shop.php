@@ -3,13 +3,13 @@
 namespace Wsmallnews\Order\Shortcuts;
 
 use Illuminate\Support\Collection;
+use think\Model;
 use Wsmallnews\Order\Contracts\Shortcuts\ShortcutInterface;
 use Wsmallnews\Order\Enums\Item\AftersaleStatus;
 use Wsmallnews\Order\Enums\Item\DeliveryStatus;
 use Wsmallnews\Order\Enums\Item\EvaluateStatus;
 use Wsmallnews\Order\Enums\Item\PayStatus;
 use Wsmallnews\Order\Enums\Item\RefundStatus;
-use Wsmallnews\Order\Models\Order;
 use Wsmallnews\Order\Models\OrderItem;
 use Wsmallnews\Order\OrderRocket;
 use Wsmallnews\Order\Pipes\Shop\Calc\Product as ProductCalcPipe;
@@ -272,8 +272,8 @@ class Shop implements ShortcutInterface
     /**
      * 添加套餐商品的 套餐项
      *
-     * @param  \think\Model  $order
-     * @param  \think\Model  $orderProduct
+     * @param  Model  $order
+     * @param  Model  $orderProduct
      * @param  array  $buyInfo
      * @return void
      */
