@@ -17,8 +17,8 @@ enum PayStatus: string implements HasColor, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Unpaid => '未支付',
-            self::Paid => '已支付',
+            self::Unpaid => __('sn-order::order.order_pay_status.unpaid'),
+            self::Paid => __('sn-order::order.order_pay_status.paid'),
         };
     }
 

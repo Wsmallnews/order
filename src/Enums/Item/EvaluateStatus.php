@@ -17,8 +17,8 @@ enum EvaluateStatus: string implements HasColor, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Unevaluate => '未评价',
-            self::Evaluated => '已评价',
+            self::Unevaluate => __('sn-order::order.item_evaluate_status.unevaluate'),
+            self::Evaluated => __('sn-order::order.item_evaluate_status.evaluated'),
         };
     }
 

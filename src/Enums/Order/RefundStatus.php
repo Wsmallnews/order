@@ -19,9 +19,9 @@ enum RefundStatus: string implements HasColor, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Unrefund => '未退款',
-            self::Hasrefund => '存在退款',
-            self::Refunded => '已退款',
+            self::Unrefund => __('sn-order::order.order_refund_status.unrefund'),
+            self::Hasrefund => __('sn-order::order.order_refund_status.hasrefund'),
+            self::Refunded => __('sn-order::order.order_refund_status.refunded'),
         };
     }
 

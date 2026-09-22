@@ -21,10 +21,10 @@ enum AftersaleStatus: string implements HasColor, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Refuse => '售后驳回',
-            self::Unafter => '未申请',
-            self::Ing => '申请售后',
-            self::Completed => '已完成',
+            self::Refuse => __('sn-order::order.item_aftersale_status.refuse'),
+            self::Unafter => __('sn-order::order.item_aftersale_status.unafter'),
+            self::Ing => __('sn-order::order.item_aftersale_status.ing'),
+            self::Completed => __('sn-order::order.item_aftersale_status.completed'),
         };
     }
 

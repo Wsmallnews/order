@@ -1,21 +1,17 @@
 <?php
 
-namespace Wsmallnews\Order\Components;
+namespace Wsmallnews\Order\Livewire\Components;
 
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\OrderCreate;
 use Wsmallnews\Order\OrderRocket;
 use Wsmallnews\Order\Shortcuts\Shop as ShopShortcut;
-use Wsmallnews\Support\Components\BaseComponent;
 
-class Confirm extends BaseComponent implements HasActions, HasForms
+class Confirm extends Base implements HasActions
 {
     use InteractsWithActions;
-    use InteractsWithForms;
 
     protected OrderCreate $orderCreate;
 
@@ -39,18 +35,11 @@ class Confirm extends BaseComponent implements HasActions, HasForms
 
     public string $platform = 'web';
 
-    // public function mount(array $relateItems, ?string $order_type, ?string $from)
-    // {
-    //     $this->relateItems = $relateItems;
-    //     $this->order_type = $order_type ?: $this->order_type;
-    //     $this->from = $from ?: $this->from;
-    // }
-
     public function boot()
     {
         $this->orderCreate = new OrderCreate($this->order_type, $this->buyer);
         $this->orderCreate->setParams([
-            ...$this->getScopeInfo(),
+            ...$this->getScopeable(),
             'relate_items' => $this->relateItems,
             'address_id' => $this->address_id,
             'coupon_id' => $this->coupon_id,
@@ -73,16 +62,15 @@ class Confirm extends BaseComponent implements HasActions, HasForms
 
     public function render()
     {
-
         $payloads = $this->rocket->getPayloads();
 
-        return view('sn-order::livewire.confirm', [
+        return view('sn-order::livewire.components.confirm', [
             'order_type' => $this->order_type,
             'address_id' => $this->address_id,
             'coupon_id' => $this->coupon_id,
             'remark' => $this->remark,
             'from' => $this->from,
             ...$payloads,
-        ])->title('订单确认');
+        ])->title(__('sn-order::order.confirm.title'));
     }
 }

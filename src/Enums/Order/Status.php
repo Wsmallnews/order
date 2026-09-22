@@ -30,14 +30,14 @@ enum Status: string implements HasColor, HasDescription, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Closed => '交易关闭',
-            self::Unpaid => '等待支付',
-            self::Paid => '已支付',
-            self::ApplyingRefund => '申请退款中',
-            self::WaitingSend => '等待发货',
-            self::WaitingGet => '等待收货',
-            self::Geted => '已收货',
-            self::Completed => '交易完成',
+            self::Closed => __('sn-order::order.order_status.closed'),
+            self::Unpaid => __('sn-order::order.order_status.unpaid'),
+            self::Paid => __('sn-order::order.order_status.paid'),
+            self::ApplyingRefund => __('sn-order::order.order_status.applying_refund'),
+            self::WaitingSend => __('sn-order::order.order_status.waiting_send'),
+            self::WaitingGet => __('sn-order::order.order_status.waiting_get'),
+            self::Geted => __('sn-order::order.order_status.geted'),
+            self::Completed => __('sn-order::order.order_status.completed'),
         };
     }
 
@@ -58,14 +58,14 @@ enum Status: string implements HasColor, HasDescription, HasLabel
     public function getDescription(): ?string
     {
         return match ($this) {
-            self::Closed => '买家未在规定时间内付款.',
-            self::Unpaid => '等待买家付款.',
-            self::Paid => '订单已支付.',
-            self::ApplyingRefund => '等待卖家处理退款申请.',
-            self::WaitingSend => '等待卖家发货.',
-            self::WaitingGet => '等待买家收货.',
-            self::Geted => '已收货.',
-            self::Completed => '交易完成.',
+            self::Closed => __('sn-order::order.order_status.desc.closed'),
+            self::Unpaid => __('sn-order::order.order_status.desc.unpaid'),
+            self::Paid => __('sn-order::order.order_status.desc.paid'),
+            self::ApplyingRefund => __('sn-order::order.order_status.desc.applying_refund'),
+            self::WaitingSend => __('sn-order::order.order_status.desc.waiting_send'),
+            self::WaitingGet => __('sn-order::order.order_status.desc.waiting_get'),
+            self::Geted => __('sn-order::order.order_status.desc.geted'),
+            self::Completed => __('sn-order::order.order_status.desc.completed'),
         };
     }
 }

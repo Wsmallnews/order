@@ -2,24 +2,19 @@
 
 namespace Wsmallnews\Order;
 
-use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Filesystem\Filesystem;
-use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
-use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Wsmallnews\Order\Commands\OrderCommand;
-use Wsmallnews\Order\Components\Confirm;
-use Wsmallnews\Order\Models\Order as OrderModel;
-use Wsmallnews\Order\Models\OrderItem;
-use Wsmallnews\Order\Testing\TestsOrder;
+use Wsmallnews\Order\Commands\OrderInstallCommand;
+use Wsmallnews\Order\Livewire\Components\Confirm;
+use Wsmallnews\Order\Support\Utils;
+use Wsmallnews\Support\Features\Modules\Module;
+use Wsmallnews\Support\Features\Modules\ModuleRegistry;
 
 class OrderServiceProvider extends PackageServiceProvider
 {
@@ -35,14 +30,7 @@ class OrderServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package->name(static::$name)
-            ->hasCommands($this->getCommands())
-            ->hasInstallCommand(function (InstallCommand $command) {
-                $command
-                    ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
-                    ->askToStarRepoOnGitHub('wsmallnews/order');
-            });
+            ->hasCommands($this->getCommands());
 
         $configFileName = $package->shortName();
 
@@ -52,7 +40,6 @@ class OrderServiceProvider extends PackageServiceProvider
 
         if (file_exists($package->basePath('/../database/migrations'))) {
             $package->hasMigrations($this->getMigrations());
-            $package->runsMigrations();
         }
 
         if (file_exists($package->basePath('/../resources/lang'))) {
@@ -64,24 +51,27 @@ class OrderServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+        // 模块身份登记（ModuleRegistry 单一事实源：类反查/存在性校验/插件实例）
+        ModuleRegistry::register(new Module(
+            id: static::$name,
+            namespace: 'Wsmallnews\\Order',
+            plugin: OrderPlugin::class,
+        ));
+    }
 
     public function packageBooted(): void
     {
         // 注册模型别名
         Relation::enforceMorphMap([
-            'sn_order' => OrderModel::class,
-            'sn_order_item' => OrderItem::class,
+            'sn_order' => Utils::getOrderModel(),
+            'sn_order_item' => Utils::getOrderItemModel(),
         ]);
 
         // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
-            $this->getAssetPackageName()
-        );
-
-        FilamentAsset::registerScriptData(
-            $this->getScriptData(),
             $this->getAssetPackageName()
         );
 
@@ -91,16 +81,24 @@ class OrderServiceProvider extends PackageServiceProvider
         // Handle Stubs
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
+                if (str_starts_with($file->getFilename(), '.')) {
+                    continue;
+                }
+
                 $this->publishes([
                     $file->getRealPath() => base_path("stubs/order/{$file->getFilename()}"),
                 ], 'order-stubs');
             }
         }
 
-        Livewire::component('sn-order-confirm', Confirm::class);
+        // 注册 livewire 命名空间（自动发现 src/Livewire/ 下的组件）
+        Livewire::addNamespace(
+            namespace: 'sn-order',
+            classNamespace: 'Wsmallnews\\Order\\Livewire'
+        );
 
-        // Testing
-        Testable::mixin(new TestsOrder);
+        // 兼容旧别名（shop 等调用方的历史引用）
+        Livewire::component('sn-order-confirm', Confirm::class);
     }
 
     protected function getAssetPackageName(): ?string
@@ -113,11 +111,7 @@ class OrderServiceProvider extends PackageServiceProvider
      */
     protected function getAssets(): array
     {
-        return [
-            // AlpineComponent::make('order', __DIR__ . '/../resources/dist/components/order.js'),
-            // Css::make('order-styles', __DIR__ . '/../resources/dist/order.css'),
-            // Js::make('order-scripts', __DIR__ . '/../resources/dist/order.js'),
-        ];
+        return [];
     }
 
     /**
@@ -126,7 +120,7 @@ class OrderServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            OrderCommand::class,
+            OrderInstallCommand::class,
         ];
     }
 
@@ -141,28 +135,12 @@ class OrderServiceProvider extends PackageServiceProvider
     /**
      * @return array<string>
      */
-    protected function getRoutes(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getScriptData(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string>
-     */
     protected function getMigrations(): array
     {
         return [
-            '2025_01_20_113233_create_sn_order_items_table',
-            '2025_01_20_113233_create_sn_orders_table',
-            '2025_02_27_141129_create_sn_order_actions_table',
+            'create_sn_orders_table',
+            'create_sn_order_items_table',
+            'create_sn_order_actions_table',
         ];
     }
 }

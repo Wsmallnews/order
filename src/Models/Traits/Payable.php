@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Wsmallnews\Order\Enums\Order\PayStatus;
+use Wsmallnews\Order\Exceptions\OrderException;
 use Wsmallnews\Order\OrderOperate;
-use Wsmallnews\Pay\Models\PayRecord;
+use Wsmallnews\Order\Support\Utils;
 
 trait Payable
 {
@@ -146,8 +147,18 @@ trait Payable
         return $this->orderOperate = new OrderOperate($this);
     }
 
+    /**
+     * 支付记录（多态）：支付记录模型由 sn-order.models.pay_record 配置（wsmallnews/pay 包提供），
+     * 未接入 pay 包时抛异常——订单主流程（创建/查询）不依赖此关联，仅支付/退款场景调用
+     */
     public function payRecords(): Relation
     {
-        return $this->morphMany(PayRecord::class, 'payable');
+        $payRecordModel = Utils::getPayRecordModel();
+
+        if (blank($payRecordModel)) {
+            throw new OrderException('Pay record model is not configured (sn-order.models.pay_record): please install the wsmallnews/pay package first.');
+        }
+
+        return $this->morphMany($payRecordModel, 'payable');
     }
 }

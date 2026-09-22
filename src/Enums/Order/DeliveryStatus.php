@@ -19,9 +19,9 @@ enum DeliveryStatus: string implements HasColor, HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::WaitingSend => '未发货',
-            self::WaitingGet => '未收货',
-            self::Geted => '已收货',
+            self::WaitingSend => __('sn-order::order.order_delivery_status.waiting_send'),
+            self::WaitingGet => __('sn-order::order.order_delivery_status.waiting_get'),
+            self::Geted => __('sn-order::order.order_delivery_status.geted'),
         };
     }
 

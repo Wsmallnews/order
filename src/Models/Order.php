@@ -5,8 +5,8 @@ namespace Wsmallnews\Order\Models;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Wsmallnews\Order\Contracts\PayableInterface;
 use Wsmallnews\Order\Enums;
-use Wsmallnews\Pay\Contracts\PayableInterface;
 use Wsmallnews\Support\Casts\MoneyCast;
 use Wsmallnews\Support\Models\SupportModel;
 
