@@ -25,12 +25,10 @@
         "php": "^8.2",
         "filament/filament": "^4.0 || ^5.0",
         "spatie/laravel-package-tools": "^1.15.0",
+        "wsmallnews/pay": "^1.0",
         "wsmallnews/product": "^1.0",
         "wsmallnews/support": "^1.0",
         "wsmallnews/user": "^1.0"
-    },
-    "suggest": {
-        "wsmallnews/pay": "支付记录关联（sn-order.models.pay_record）需要 pay 包提供 PayRecord 模型"
     },
     "require-dev": {
         "laravel/pint": "^1.0",

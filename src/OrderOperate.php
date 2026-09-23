@@ -67,20 +67,21 @@ class OrderOperate
      */
     public function checkAndPaid(): OrderModel
     {
-        $paid_fee = $this->order->getPaidFee(true);    // 加锁读获取已支付金额
+        $paid_fee = $this->order->getPaidFee(true);    // 加锁读获取已支付金额（整数分）
 
-        $remain_pay_fee = bcsub($this->order->pay_fee, (string) $paid_fee, 2);      // 剩余应支付金额
+        // 剩余应支付金额（整数分；金额赋值走 Money 对象，防 cast 标量按元解析错账）
+        $remain_pay_fee = max(0, sn_money()->minor(sn_money()->subtract($this->order->pay_fee, $paid_fee)));
 
         if ($remain_pay_fee > 0) {
             // 订单部分支付
-            $this->order->remain_pay_fee = $remain_pay_fee;
+            $this->order->remain_pay_fee = sn_money()->fromMinor($remain_pay_fee, $this->order->getPayCurrency());
             $this->order->save();
 
             return $this->order;
         }
 
         // 订单已支付
-        $this->order->remain_pay_fee = 0;
+        $this->order->remain_pay_fee = sn_money()->fromMinor(0, $this->order->getPayCurrency());
         $this->order->paid_at = Carbon::now();
         $this->order->pay_status = Enums\Order\PayStatus::Paid;
         $this->order->status = Enums\Order\Status::Paid;

@@ -4,6 +4,7 @@ namespace Wsmallnews\Order;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Pipeline;
+use think\Model;
 use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\Contracts\Shortcuts\ShortcutInterface;
 use Wsmallnews\Order\Enums\Order\DeliveryStatus;
@@ -241,6 +242,7 @@ class OrderCreate
         $order->scope_type = $this->params['scope_type'];
         $order->scope_id = $this->params['scope_id'];
         $order->type = $this->order_type;
+        $order->currency = sn_money()->defaultCurrency();        // 交易币种创建时快照
 
         $order->order_sn = get_sn($this->buyer ? $this->buyer->id : 0);
         $order->buyer_type = $this->buyer?->morphType() ?? 'anonymous';
@@ -317,7 +319,7 @@ class OrderCreate
     /**
      * 添加收货地址信息
      *
-     * @param  \think\Model  $order
+     * @param  Model  $order
      * @param  array  $result
      * @return void
      */
