@@ -2,6 +2,7 @@
 
 namespace Wsmallnews\Order\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,6 +10,7 @@ use Wsmallnews\Order\Contracts\PayableInterface;
 use Wsmallnews\Order\Enums;
 use Wsmallnews\Support\Casts\MoneyCast;
 use Wsmallnews\Support\Models\SupportModel;
+use Wsmallnews\Support\Support\Utils as SupportUtils;
 
 class Order extends SupportModel implements PayableInterface
 {
@@ -27,15 +29,15 @@ class Order extends SupportModel implements PayableInterface
         'fields_infos' => 'array',
         'options' => 'array',
 
-        // 金额
-        'relate_original_amount' => MoneyCast::class,
-        'relate_amount' => MoneyCast::class,
-        'order_amount' => MoneyCast::class,
+        // 金额（币种读行内 currency 列，空回落站点默认）
+        'relate_original_amount' => MoneyCast::class . ':currency',
+        'relate_amount' => MoneyCast::class . ':currency',
+        'order_amount' => MoneyCast::class . ':currency',
         'score_amount' => MoneyCast::class,
-        'discount_amount' => MoneyCast::class,
-        'pay_fee' => MoneyCast::class,
-        'original_pay_fee' => MoneyCast::class,
-        'remain_pay_fee' => MoneyCast::class,
+        'discount_amount' => MoneyCast::class . ':currency',
+        'pay_fee' => MoneyCast::class . ':currency',
+        'original_pay_fee' => MoneyCast::class . ':currency',
+        'remain_pay_fee' => MoneyCast::class . ':currency',
 
         // Enum
         'status' => Enums\Order\Status::class,
@@ -74,5 +76,13 @@ class Order extends SupportModel implements PayableInterface
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'order_id');
+    }
+
+    /**
+     * 租户
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(SupportUtils::getTenantModel());
     }
 }
