@@ -4,344 +4,272 @@ namespace Wsmallnews\Order;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Pipeline;
-use think\Model;
-use Wsmallnews\Order\Contracts\BuyerInterface;
 use Wsmallnews\Order\Contracts\Shortcuts\ShortcutInterface;
 use Wsmallnews\Order\Enums\Order\DeliveryStatus;
 use Wsmallnews\Order\Enums\Order\PayStatus;
 use Wsmallnews\Order\Enums\Order\RefundStatus;
 use Wsmallnews\Order\Enums\Order\Status as OrderStatus;
 use Wsmallnews\Order\Exceptions\OrderCreateException;
+use Wsmallnews\Order\Features\Shortcuts\ShortcutRegistry;
 use Wsmallnews\Order\Models\Order;
+use Wsmallnews\Order\Models\OrderAddress;
+use Wsmallnews\Order\Support\OrderPipes;
+use Wsmallnews\Profile\Support\Utils as ProfileUtils;
+use Wsmallnews\Support\Contracts\HasSnIdentifiable;
 use Wsmallnews\Support\Exceptions\SupportException;
 
+/**
+ * 订单创建引擎：阶段化管道执行器（配方无感知）。
+ *
+ * 阶段顺序：fetch（取数）→ check（校验）→ calc（计价）→ summary（汇总），
+ * create 时在事务内追加 creating 管道 + 落单 + 配方附表。
+ * 管道清单 = 配方基础清单经 OrderPipes 注册表加工（跨包插拔）。
+ */
 class OrderCreate
 {
-    public $rocket = null;
+    public ?OrderRocket $rocket = null;
 
     /**
      * 传入参数
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    public $params = [];
-
-    public $calc_type = 'create';
+    public array $params = [];
 
     /**
-     * @var ShortcutInterface
+     * calc=试算（确认页展示），create=落单
      */
-    public $shortcut = null;
+    public string $calc_type = 'create';
 
-    // // public $money = 0;
+    /**
+     * 订单类型（orders.type，同时是管道注册表的场景标识）
+     */
+    public string $order_type;
 
-    public $order_type = 'product';
+    public ?HasSnIdentifiable $buyer = null;
 
-    public ?BuyerInterface $buyer = null;
+    protected ?ShortcutInterface $shortcut = null;
 
-    public $request_identify = '';
+    public string $request_identify = '';
 
-    public function __construct($order_type, $buyer)
+    public function __construct(string $order_type, ?HasSnIdentifiable $buyer = null)
     {
         $this->order_type = $order_type;
-
         $this->buyer = $buyer;
     }
 
-    public function setParams($params)
+    public function setParams(array $params): static
     {
         $this->params = $params;
 
         // 生成本次请求唯一标识
-        $this->request_identify = md5(client_unique() . ':' . time() . ':' . ($this->buyer ? $this->buyer->morphType() . ':' . $this->buyer->morphId() : 'anonymous:0') . ':' . json_encode($params));
+        $this->request_identify = md5(client_unique() . ':' . time() . ':' . ($this->buyer ? $this->buyer->getMorphClass() . ':' . $this->buyer->getKey() : 'anonymous:0') . ':' . json_encode($params));
 
         return $this;
     }
 
     /**
-     * 设置 shortcut
-     *
-     * @return void
+     * 显式设置配方（缺省时按 order_type 从场景注册表解析）
      */
-    public function setShortcut(ShortcutInterface $shortcut)
+    public function setShortcut(ShortcutInterface $shortcut): static
     {
         $this->shortcut = $shortcut;
 
         return $this;
     }
 
+    public function getShortcut(): ShortcutInterface
+    {
+        return $this->shortcut ??= app(ShortcutRegistry::class)->shortcut($this->order_type);
+    }
+
     /**
-     * 计算订单
-     *
-     * @return OrderRocket
+     * 计算订单（fetch → check → calc → summary）
      */
-    public function calc($calc_type = 'calc')
+    public function calc(string $calc_type = 'calc'): OrderRocket
     {
         $this->calc_type = $calc_type;
-        // 检查系统必要条件
-        // check_env(['bcmath', 'queue']);
 
-        $this->start();
-
+        $this->fetch();
         $this->check();
-
-        // 计算订单各种费用
         $this->calcAmount();
-
-        // summary
         $this->summary();
 
         return $this->rocket;
     }
 
-    // public function setProducts($products): OrderCreate
-    // {
-    //     $this->params['products'] = $products;
-
-    //     return $this;
-    // }
-
-    public function start($products = [])
+    /**
+     * 取数阶段
+     */
+    public function fetch(): void
     {
-        // if ($products) {
-        //     $this->setProducts($products);
-        // }
+        $this->bootRocket();
 
-        $this->rocket = (new OrderRocket)->setRadars([
-            'buyer' => $this->buyer,
-            'calc_type' => $this->calc_type,
-            'request_identify' => $this->request_identify,
-            'order_type' => $this->order_type,
-        ])->setParams($this->params);
+        $pipes = OrderPipes::apply($this->order_type, OrderPipes::STAGE_FETCH, $this->getShortcut()->getFetchPipes());
 
-        // 获取 pipes
-        $getPipes = $this->shortcut->getGetPipes();
-
-        $this->rocket = Pipeline::send($this->rocket)
-            ->through($getPipes)
-            ->via('get')
-            ->then(function ($rocket) {
-                return $rocket;
-            });
-    }
-
-    public function check()
-    {
-        // 获取 pipes
-        $checkPipes = $this->shortcut->getCheckPipes();
-
-        $this->rocket = Pipeline::send($this->rocket)
-            ->through($checkPipes)
-            ->via('check')
-            ->then(function ($rocket) {
-                return $rocket;
-            });
-    }
-
-    public function calcAmount()
-    {
-        // 获取 pipes
-        $calcPipes = $this->shortcut->getCalcPipes();
-
-        $this->rocket = Pipeline::send($this->rocket)
-            ->through($calcPipes)
-            ->via('calc')
-            ->then(function ($rocket) {
-                return $rocket;
-            });
-    }
-
-    public function summary()
-    {
-        // 获取 pipes
-        $summaryPipes = $this->shortcut->getSummaryPipes();
-
-        $this->rocket = Pipeline::send($this->rocket)
-            ->through($summaryPipes)
-            ->via('summary')
-            ->then(function ($rocket) {
-                return $rocket;
-            });
+        $this->rocket = $this->pipeline($pipes, 'fetch');
     }
 
     /**
-     * 获取订单可用优惠券
-     *
-     * @return OrderRocket
+     * 校验阶段
      */
-    // public function getCoupons($calc_type = 'coupon')
-    // {
-    //     $this->calc_type = $calc_type;
-    //     // 检查系统必要条件
-    //     // check_env(['bcmath', 'queue']);
+    public function check(): void
+    {
+        $pipes = OrderPipes::apply($this->order_type, OrderPipes::STAGE_CHECK, $this->getShortcut()->getCheckPipes());
 
-    //     $this->start();
+        $this->rocket = $this->pipeline($pipes, 'check');
+    }
 
-    //     $this->check();
+    /**
+     * 计价阶段
+     */
+    public function calcAmount(): void
+    {
+        $pipes = OrderPipes::apply($this->order_type, OrderPipes::STAGE_CALC, $this->getShortcut()->getCalcPipes());
 
-    //     // 计算订单各种费用
-    //     $this->calcAmount();
+        $this->rocket = $this->pipeline($pipes, 'calc');
+    }
 
-    //     // summary
-    //     $this->summary();
+    /**
+     * 汇总阶段
+     */
+    public function summary(): void
+    {
+        $pipes = OrderPipes::apply($this->order_type, OrderPipes::STAGE_SUMMARY, $this->getShortcut()->getSummaryPipes());
 
-    //     $couponCalcManager = new CouponCalcManager($this->rocket);
-    //     // 获取全部可用优惠券
-    //     return $couponCalcManager->getCoupons();
-    // }
+        $this->rocket = $this->pipeline($pipes, 'summary');
+    }
 
-    public function create($rocket)
+    /**
+     * 落单（事务内：creating 管道 → 主单落库 → 配方附表）
+     */
+    public function create(OrderRocket $rocket)
     {
         try {
             DB::transaction(function () use ($rocket) {
-                // 获取 pipes
-                $creatingPipes = $this->shortcut->getCreatingPipes();
+                $pipes = OrderPipes::apply($this->order_type, OrderPipes::STAGE_CREATING, $this->getShortcut()->getCreatingPipes());
 
                 $this->rocket = Pipeline::send($rocket)
-                    ->through($creatingPipes)
+                    ->through($pipes)
                     ->via('creating')
                     ->then(function (OrderRocket $rocket) {
                         $order = $this->saveOrder($rocket);
 
-                        $rocket->setRadar('order', $order);
+                        $rocket->setRadar(OrderRocket::RADAR_ORDER, $order);
 
-                        $this->shortcut->save($rocket);
+                        $this->getShortcut()->save($rocket);
 
                         return $rocket;
                     });
             });
         } catch (SupportException $e) {
-            // 下单失败，检测并返还锁定的库存
-            // $this->shortcut->failBack($rocket);
-            throw new OrderCreateException($e->getMessage());
+            // P2 库存扩展落地时在此挂 failBack 补偿钩子（管道锁定的资源回滚）
+            throw new OrderCreateException($e->getMessage(), 0, $e);
         } catch (\Exception $e) {
-            // 下单失败，检测并返还锁定的库存
-            // $this->shortcut->failBack($rocket);
-            // format_log_error($e, 'OrderCreate');        // 记录日志
-            throw new OrderCreateException($e->getMessage());
+            throw new OrderCreateException($e->getMessage(), 0, $e);
         }
 
-        // 获取订单
-        $order = $this->rocket->getRadar('order', null);
-
-        // 订单创建后
-        // $hookData = [
-        //     'order' => $order,
-        // ];
-        // \think\Hook::listen('order_create_after', $hookData);
-
-        return $order;
+        return $this->rocket->getRadar(OrderRocket::RADAR_ORDER);
     }
 
-    public function saveOrder(OrderRocket $rocket)
+    /**
+     * 初始化数据总线
+     */
+    protected function bootRocket(): void
     {
-        $payloads = $rocket->getPayloads();
+        $this->rocket = (new OrderRocket)->setRadars([
+            OrderRocket::RADAR_BUYER => $this->buyer,
+            OrderRocket::RADAR_CALC_TYPE => $this->calc_type,
+            OrderRocket::RADAR_REQUEST_IDENTIFY => $this->request_identify,
+            OrderRocket::RADAR_ORDER_TYPE => $this->order_type,
+        ])->setParams($this->params);
+    }
+
+    /**
+     * @param  array<string, class-string>  $pipes
+     */
+    protected function pipeline(array $pipes, string $stage): OrderRocket
+    {
+        return Pipeline::send($this->rocket)
+            ->through($pipes)
+            ->via($stage)
+            ->then(fn (OrderRocket $rocket) => $rocket);
+    }
+
+    /**
+     * 主单落库（金额整数分 → fromMinor 赋值，货币规范第 6 条）
+     *
+     * @param  array<string, mixed>  $payloads
+     */
+    protected function saveOrder(OrderRocket $rocket): Order
+    {
+        $payloads = $rocket->getPayloads() ?? collect([]);
+        $currency = sn_money()->defaultCurrency();
 
         $order = new Order;
 
         $order->scope_type = $this->params['scope_type'];
         $order->scope_id = $this->params['scope_id'];
         $order->type = $this->order_type;
-        $order->currency = sn_money()->defaultCurrency();        // 交易币种创建时快照
+        $order->currency = $currency;       // 交易币种创建时快照
 
-        $order->order_sn = get_sn($this->buyer ? $this->buyer->id : 0);
-        $order->buyer_type = $this->buyer?->morphType() ?? 'anonymous';
-        $order->buyer_id = $this->buyer?->morphId() ?? 0;
+        $order->order_sn = get_sn($this->buyer ? $this->buyer->getKey() : 0);
+        $order->buyer_type = $this->buyer ? $this->buyer->getMorphClass() : 'anonymous';
+        $order->buyer_id = $this->buyer ? $this->buyer->getKey() : 0;
 
-        // [original_product_amount, original_delivery_amount, original_product_attribute_amount]
-        $order->original_amount_fields = sn_currency()->formatByDecimal($payloads['original_amount_fields']);
-        // [product_amount, delivery_amount, product_attribute_amount]
-        $order->amount_fields = sn_currency()->formatByDecimal($payloads['amount_fields']);
+        // JSON 金额明细：整数分（键 => 金额），不存小数不嵌币种
+        $order->original_amount_fields = $payloads['original_amount_fields'];
+        $order->amount_fields = $payloads['amount_fields'];
+        $order->discount_fields = $payloads['discount_fields'];
 
-        $order->relate_original_amount = $payloads['relate_original_amount'];
-        $order->relate_amount = $payloads['relate_amount'];
+        $order->relate_original_amount = sn_money()->fromMinor((int) $payloads['relate_original_amount'], $currency);
+        $order->relate_amount = sn_money()->fromMinor((int) $payloads['relate_amount'], $currency);
+        $order->order_amount = sn_money()->fromMinor((int) $payloads['order_amount'], $currency);
+        $order->score_amount = (int) ($payloads['score_amount'] ?? 0);       // 积分字段（非货币）
+        $order->discount_amount = sn_money()->fromMinor((int) $payloads['discount_amount'], $currency);
 
-        $order->order_amount = $payloads['order_amount'];
-        $order->score_amount = $payloads['score_amount'] ?? 0;
+        $payFee = (int) $payloads['pay_fee'];
+        $order->pay_fee = sn_money()->fromMinor($payFee, $currency);
+        $order->original_pay_fee = sn_money()->fromMinor($payFee, $currency);
+        $order->remain_pay_fee = sn_money()->fromMinor($payFee, $currency);
 
         $order->remark = $this->params['remark'] ?? null;
+        $order->platform = $this->params['platform'] ?? null;
 
         $order->status = OrderStatus::Unpaid;
-
-        // 订单总优惠金额
-        $order->discount_amount = $payloads['discount_amount'];
-        // [coupon_discount_fee]
-        $order->discount_fields = sn_currency()->formatByDecimal($payloads['discount_fields']);
-
-        // 订单应支付金额
-        $order->pay_fee = $payloads['pay_fee'];
-        $order->original_pay_fee = $payloads['pay_fee'];
-        $order->remain_pay_fee = $payloads['pay_fee'];
-
         $order->pay_status = PayStatus::Unpaid;
-
-        // $order->delivery_types = join(',', $radars['delivery_types']);
         $order->delivery_status = DeliveryStatus::WaitingSend;
         $order->refund_status = RefundStatus::Unrefund;
 
+        // 展示性字段集（格式化串，仅展示不参与运算）
         $order->fields_infos = $payloads['fields_infos'];
 
-        $options = [];
-        $order->options = array_merge($options, $radars['options'] ?? []);
-
-        $order->platform = $this->params['platform'] ?? null;
+        $order->options = $rocket->getRadar('options', []);
 
         $order->save();
 
-        // 重新查询订单
-        $order = Order::findOrFail($order->id);
+        // 收货地址快照：address_id 存在时校验归属（buyer 范围）后复制为订单地址
+        $addressId = (int) $rocket->getParam('address_id', 0);
 
-        // $invoice_status = 0;    // 没有申请
-        // if ($result['invoice_status'] && $this->invoice_id) {
-        //     // 可开具，并且申请了
-        //     $invoice_status = 1;
-        // } else if ($result['invoice_status'] == 0) {
-        //     // 不可开具
-        //     $invoice_status = -1;
-        // }
-        // $ext['invoice_status'] = $invoice_status;        // 可开具发票，并且申请了
+        if ($addressId > 0) {
+            $buyer = $rocket->getBuyer();
 
-        // $orderData['ext'] = $payloads['ext_fields'] ?? [];
-        // $orderData['platform'] = request()->header('platform');
+            $addressModel = ProfileUtils::getAddressModel();
 
-        // 这里保存的
+            $address = $addressModel::query()
+                ->whereKey($addressId)
+                ->when($buyer, fn ($query) => $query
+                    ->where('owner_type', $buyer->getMorphClass())
+                    ->where('owner_id', $buyer->getKey()))
+                ->first();
 
-        // // 添加收货地址信息
-        // $need_address = $payloads['need_address'];
-        // if ($need_address) {
-        //     $user_address = $payloads['user_address'] ?? null;
-        //     $this->saveOrderAddress($order, $user_address);
-        // }
+            if (! $address) {
+                throw new SupportException(__('sn-profile::profile.errors.address_not_owned'));
+            }
 
-        return $order;
-    }
+            OrderAddress::snapshot($order, $address);
+        }
 
-    /**
-     * 添加收货地址信息
-     *
-     * @param  Model  $order
-     * @param  array  $result
-     * @return void
-     */
-    private function saveOrderAddress($order, $user_address)
-    {
-        // 保存收货地址
-        $orderAddress = new Address;
-        $orderAddress->order_id = $order->id;
-        $orderAddress->user_id = $this->user ? $this->user->id : 0;
-        $orderAddress->consignee = $user_address->consignee;
-        $orderAddress->gender = $user_address->gender;
-        $orderAddress->mobile = $user_address->mobile;
-        $orderAddress->province_name = $user_address->province_name;
-        $orderAddress->city_name = $user_address->city_name;
-        $orderAddress->district_name = $user_address->district_name;
-        $orderAddress->address = $user_address->address;
-        $orderAddress->street_number = $user_address->street_number;
-        $orderAddress->province_id = $user_address->province_id;
-        $orderAddress->city_id = $user_address->city_id;
-        $orderAddress->district_id = $user_address->district_id;
-        $orderAddress->latitude = $user_address->latitude;
-        $orderAddress->longitude = $user_address->longitude;
-        $orderAddress->save();
+        return $order->findOrFail($order->id);
     }
 }

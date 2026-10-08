@@ -12,6 +12,8 @@ return [
         'items_empty' => 'No items in the order',
         'pay_fee' => 'Total',
         'submit' => 'Place Order',
+        'remark' => 'Order Remark',
+        'remark_placeholder' => 'Message to seller (optional)',
     ],
 
     'order_status' => [
@@ -78,5 +80,29 @@ return [
     'item_evaluate_status' => [
         'unevaluate' => 'Not Reviewed',
         'evaluated' => 'Reviewed',
+    ],
+
+    'order_resource' => [
+        'model_label' => 'Order',
+        'plural_model_label' => 'Orders',
+        'navigation_label' => 'Orders',
+    ],
+
+    'order_table' => [
+        'search_placeholder' => 'Search order no. / ID',
+        'id' => 'ID',
+        'order_sn' => 'Order No.',
+        'buyer' => 'Buyer',
+        'order_amount' => 'Amount',
+        'pay_status' => 'Pay Status',
+        'status' => 'Status',
+        'delivery_status' => 'Delivery Status',
+        'created_at' => 'Created At',
+        'updated_at' => 'Updated At',
+    ],
+
+    'order_form' => [
+        'order_info' => 'Order Info',
+        'address_section' => 'Shipping Address',
     ],
 ];

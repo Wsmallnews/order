@@ -5,6 +5,8 @@ namespace Wsmallnews\Order;
 use Carbon\Carbon;
 use Wsmallnews\Order\Models\Order as OrderModel;
 use Wsmallnews\Order\Models\OrderAction as OrderActionModel;
+use Wsmallnews\Pay\Models\PayRecord;
+use Wsmallnews\Pay\Models\PayRefund;
 
 class OrderOperate
 {
@@ -98,6 +100,46 @@ class OrderOperate
 
         // @sn todo 支付成功后续使用异步队列处理
         // \think\Queue::push('\addons\estore\package\order\job\OrderPaid@paid', ['order' => $this->order], 'estore-high');
+
+        return $this->order;
+    }
+
+    /**
+     * 退款成功回调：按支付单累计退款额判定部分/全额，联动订单与明细退款状态
+     *
+     * 注意：RefundSucceeded 事件在 pay 包累计 refunded_fee 写库之前触发，
+     * 判定需自行加上本次退款单金额（$refund 参数的用途）。
+     *
+     * @param  PayRecord  $payRecord  支付单（refunded_fee 为事件时点累计，未含本次）
+     * @param  PayRefund  $refund  本次退款单
+     */
+    public function refunded($payRecord, $refund = null): OrderModel
+    {
+        $payFee = (int) sn_money()->minor($payRecord->pay_fee);
+
+        // 事件时点累计 + 本次退款额 = 真实累计退款
+        $refundedFee = (int) sn_money()->minor($payRecord->refunded_fee)
+            + (int) sn_money()->minor($refund?->refund_fee ?? 0);
+
+        $isFullRefund = $payFee > 0 && $refundedFee >= $payFee;
+
+        $this->order->refund_status = $isFullRefund
+            ? Enums\Order\RefundStatus::Refunded
+            : Enums\Order\RefundStatus::Hasrefund;
+        $this->order->save();
+
+        if ($isFullRefund) {
+            // 全额退款：明细同步退款状态；部分退款不动明细
+            $this->order->orderItems->each(function ($item) {
+                $item->refund_status = Enums\Item\RefundStatus::Refunded;
+                $item->save();
+            });
+        }
+
+        OrderActionModel::add(
+            order: $this->order,
+            message: $isFullRefund ? '订单全额退款' : '订单部分退款',
+        );
 
         return $this->order;
     }

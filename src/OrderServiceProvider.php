@@ -7,12 +7,17 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Wsmallnews\Order\Commands\OrderInstallCommand;
+use Wsmallnews\Order\Features\Shortcuts\ShortcutRegistry;
+use Wsmallnews\Order\Listeners\RefundSucceededListener;
 use Wsmallnews\Order\Livewire\Components\Confirm;
+use Wsmallnews\Order\Models\OrderAddress;
 use Wsmallnews\Order\Support\Utils;
+use Wsmallnews\Pay\Events\RefundSucceeded;
 use Wsmallnews\Support\Features\Modules\Module;
 use Wsmallnews\Support\Features\Modules\ModuleRegistry;
 
@@ -59,6 +64,9 @@ class OrderServiceProvider extends PackageServiceProvider
             namespace: 'Wsmallnews\\Order',
             plugin: OrderPlugin::class,
         ));
+
+        // 配方注册表（订单类型 → Shortcut 配方注册/反查）
+        $this->app->singleton(ShortcutRegistry::class);
     }
 
     public function packageBooted(): void
@@ -67,6 +75,7 @@ class OrderServiceProvider extends PackageServiceProvider
         Relation::enforceMorphMap([
             'sn_order' => Utils::getOrderModel(),
             'sn_order_item' => Utils::getOrderItemModel(),
+            'sn_order_address' => OrderAddress::class,
         ]);
 
         // Asset Registration
@@ -99,6 +108,9 @@ class OrderServiceProvider extends PackageServiceProvider
 
         // 兼容旧别名（shop 等调用方的历史引用）
         Livewire::component('sn-order-confirm', Confirm::class);
+
+        // 退款成功 → 订单状态流转 + 场景补偿管道（非订单主体静默跳过）
+        Event::listen(RefundSucceeded::class, RefundSucceededListener::class);
     }
 
     protected function getAssetPackageName(): ?string
@@ -141,6 +153,7 @@ class OrderServiceProvider extends PackageServiceProvider
             'create_sn_orders_table',
             'create_sn_order_items_table',
             'create_sn_order_actions_table',
+            'create_sn_order_addresses_table',
         ];
     }
 }

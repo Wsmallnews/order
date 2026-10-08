@@ -1,16 +1,10 @@
 @php
-    $userAddressColumns = [
-        'md' => 2,
-        '2xl' => 3,
-    ];
 @endphp
 
 <div class="w-full flex flex-col @4xl:flex-row flex-nowrap mx-auto sn-gap" x-data="snOrderConfirm({})">
     <div class="flex-1 flex flex-col sn-gap min-w-0">
-        {{-- 收货地址（内嵌组件：scopeable 参数由调用方传入；卡片皮 + 行自带边距） --}}
-        <div class="sn-container sn-padded">
-            <livewire:sn-user::components.choose-address :user="$buyer" :columns="$userAddressColumns" />
-        </div>
+        {{-- 收货地址块由调用页面承载（shop 结账页挂 sn-profile::components.choose-address，
+            选择后经 sn-profile-address:selected 事件通知本组件；本组件聚焦订单确认与落单） --}}
 
         {{-- 商品清单（行式列表：header 列头 + 行分割线，容器只穿卡片皮） --}}
         <div class="sn-container overflow-hidden">
@@ -33,12 +27,12 @@
                                     · {{ join('；', $item['relate_attributes']) }}
                                 @endif
                             </div>
-                            <div class="text-base sn-title-text">{{ $item['relate_price'] }}</div>
+                            <div class="text-base sn-title-text">{{ sn_money()->format($item['relate_price']) }}</div>
                         </div>
 
                         <div class="flex flex-col items-end gap-1 flex-none">
                             <div class="sn-descript-text">x{{ $item['relate_num'] }}</div>
-                            <div class="font-semibold sn-title-text">{{ $item['relate_amount'] }}</div>
+                            <div class="font-semibold sn-title-text">{{ sn_money()->format($item['relate_amount']) }}</div>
                         </div>
                     </li>
                 @empty
@@ -55,58 +49,38 @@
         </div>
     </div>
 
-    {{-- 金额汇总 + 提交（窄屏在下、@4xl 起右侧栏） --}}
+    {{-- 金额汇总 + 提交（窄屏在下、@4xl 起右侧栏）；行渲染统一走 FieldInfo（翻译键求值 + 金额格式化） --}}
     <div class="flex-none w-full @4xl:w-96 sn-container sn-padded h-fit">
         <div class="flex flex-col w-full sn-gap">
-            @foreach ($amount_fields_info as $info)
-                <div class="flex w-full items-center">
-                    <div class="flex flex-1 items-center">
-                        <div @class([
-                            'text-base',
-                            'font-bold' => (bool) $info['high_light'],
-                        ])>
-                            {{ $info['text'] }}
-                        </div>
-                        @if ($info['desc'])
-                            <div class="text-sm sn-descript-text ml-2.5">({{ $info['desc'] }})</div>
-                        @endif
-                    </div>
-                    <div @class([
-                        'flex flex-1 justify-end',
-                        'font-bold text-primary-600 dark:text-primary-400' => (bool) $info['high_light'],
-                    ])>
-                        {{ $info['value'] }}
-                    </div>
-                </div>
+            @foreach (\Wsmallnews\Order\Support\FieldInfo::sorted($amount_fields_info ?? []) as $item)
+                {{ \Wsmallnews\Order\Support\FieldInfo::render($item) }}
             @endforeach
 
-            @foreach ($discount_fields_info as $info)
-                <div class="flex w-full items-center">
-                    <div class="flex flex-1 items-center">
-                        <div @class([
-                            'text-base',
-                            'font-bold' => (bool) $info['high_light'],
-                        ])>
-                            {{ $info['text'] }}
-                        </div>
-                        @if ($info['desc'])
-                            <div class="text-sm sn-descript-text ml-2.5">({{ $info['desc'] }})</div>
-                        @endif
-                    </div>
-                    <div @class([
-                        'flex flex-1 justify-end',
-                        'font-bold text-primary-600 dark:text-primary-400' => (bool) $info['high_light'],
-                    ])>
-                        {{ $info['value'] }}
-                    </div>
-                </div>
+            @foreach (\Wsmallnews\Order\Support\FieldInfo::sorted($discount_fields_info ?? []) as $item)
+                {{ \Wsmallnews\Order\Support\FieldInfo::render($item) }}
             @endforeach
+        </div>
+
+        {{-- 订单备注：wire:model 随下一次请求同步（不影响金额试算，无需 live 触发重算） --}}
+        <div class="flex flex-col w-full mt-2 gap-1.5">
+            <label for="order-remark" class="text-sm sn-descript-text">
+                {{ __('sn-order::order.confirm.remark') }}
+            </label>
+            <x-filament::input.wrapper>
+                <textarea
+                    id="order-remark"
+                    wire:model="remark"
+                    rows="2"
+                    placeholder="{{ __('sn-order::order.confirm.remark_placeholder') }}"
+                    class="fi-input w-full resize-none"
+                ></textarea>
+            </x-filament::input.wrapper>
         </div>
 
         <div class="flex items-end justify-between w-full mt-6">
             <div class="flex items-end sn-gap">
                 <div>{{ __('sn-order::order.confirm.pay_fee') }}：</div>
-                <div class="text-xl font-bold sn-primary-text">{{ $pay_fee }}</div>
+                <div class="text-xl font-bold sn-primary-text">{{ sn_money()->format($pay_fee) }}</div>
             </div>
             <x-filament::button @click="create">
                 {{ __('sn-order::order.confirm.submit') }}

@@ -12,6 +12,8 @@ return [
         'items_empty' => '订单中没有商品',
         'pay_fee' => '应付',
         'submit' => '提交订单',
+        'remark' => '订单备注',
+        'remark_placeholder' => '给商家留言（选填）',
     ],
 
     'order_status' => [
@@ -78,5 +80,29 @@ return [
     'item_evaluate_status' => [
         'unevaluate' => '未评价',
         'evaluated' => '已评价',
+    ],
+
+    'order_resource' => [
+        'model_label' => '订单',
+        'plural_model_label' => '订单',
+        'navigation_label' => '订单',
+    ],
+
+    'order_table' => [
+        'search_placeholder' => '搜索订单号 / ID',
+        'id' => 'ID',
+        'order_sn' => '订单号',
+        'buyer' => '买家',
+        'order_amount' => '订单金额',
+        'pay_status' => '支付状态',
+        'status' => '订单状态',
+        'delivery_status' => '发货状态',
+        'created_at' => '下单时间',
+        'updated_at' => '更新时间',
+    ],
+
+    'order_form' => [
+        'order_info' => '订单信息',
+        'address_section' => '收货地址',
     ],
 ];

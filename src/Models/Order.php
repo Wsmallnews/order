@@ -4,6 +4,7 @@ namespace Wsmallnews\Order\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Wsmallnews\Order\Enums;
@@ -76,6 +77,14 @@ class Order extends SupportModel implements PayableInterface
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class, 'order_id');
+    }
+
+    /**
+     * 收货地址快照（1:1，下单时从地址簿复制，独立演化）
+     */
+    public function address(): HasOne
+    {
+        return $this->hasOne(OrderAddress::class, 'order_id');
     }
 
     /**
