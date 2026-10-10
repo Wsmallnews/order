@@ -1,7 +1,7 @@
 @php
 @endphp
 
-<div class="w-full flex flex-col @4xl:flex-row flex-nowrap mx-auto sn-gap" x-data="snOrderConfirm({})">
+<div class="w-full flex flex-col @4xl:flex-row flex-nowrap mx-auto sn-gap">
     <div class="flex-1 flex flex-col sn-gap min-w-0">
         {{-- 收货地址块由调用页面承载（shop 结账页挂 sn-profile::components.choose-address，
             选择后经 sn-profile-address:selected 事件通知本组件；本组件聚焦订单确认与落单） --}}
@@ -82,23 +82,10 @@
                 <div>{{ __('sn-order::order.confirm.pay_fee') }}：</div>
                 <div class="text-xl font-bold sn-primary-text">{{ sn_money()->format($pay_fee) }}</div>
             </div>
-            <x-filament::button @click="create">
+            {{-- 提交订单：直调服务端方法（create 模式重跑管道后落单），不依赖内联 Alpine --}}
+            <x-filament::button wire:click="submitOrder">
                 {{ __('sn-order::order.confirm.submit') }}
             </x-filament::button>
         </div>
     </div>
 </div>
-
-@once
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('snOrderConfirm', () => ({
-                create() {
-                    // calc=试算，create=真实创建订单（boot 阶段按 type 走创建管道）
-                    this.$wire.set('type', 'create');
-                    this.$wire.create();
-                },
-            }));
-        });
-    </script>
-@endonce

@@ -57,6 +57,17 @@ class Confirm extends Base implements HasActions
         $this->addressId ??= $this->buyer?->addresses()->value('id');
 
         $this->orderCreate = new OrderCreate($this->order_type, $this->buyer);
+        $this->syncOrderParams();
+
+        $this->rocket = $this->orderCreate->calc($this->type);
+    }
+
+    /**
+     * 同步下单参数：boot 与 submitOrder 各刷一遍——boot 跑在请求 updates 应用之前，
+     * 同一提交请求内更新的属性（remark 等 defer model）须在 action 时重刷才能进管道参数
+     */
+    protected function syncOrderParams(): void
+    {
         $this->orderCreate->setParams([
             ...$this->getScopeable(),
             'relate_items' => $this->relateItems,
@@ -65,8 +76,6 @@ class Confirm extends Base implements HasActions
             'from' => $this->from,
             'platform' => $this->platform,
         ]);
-
-        $this->rocket = $this->orderCreate->calc($this->type);
     }
 
     /**
@@ -78,8 +87,17 @@ class Confirm extends Base implements HasActions
         $this->addressId = $addressId;
     }
 
-    public function create()
+    /**
+     * 提交订单：以 create 模式重跑管道（校验收紧）后落单。
+     * 直调服务端方法（wire:click），不依赖组件内联 Alpine——嵌套组件内联脚本
+     * 经 Livewire 水合后不生效（F1），交互动作一律走服务端方法。
+     */
+    public function submitOrder()
     {
+        $this->type = 'create';
+        $this->syncOrderParams();
+        $this->rocket = $this->orderCreate->calc($this->type);
+
         $order = $this->orderCreate->create($this->rocket);
 
         $this->dispatch('sn-order-created', order_sn: $order->order_sn);
