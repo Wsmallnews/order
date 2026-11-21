@@ -1,4 +1,5 @@
 @php
+    use Wsmallnews\Order\Support\FieldInfo;
 @endphp
 
 <div class="w-full flex flex-col @4xl:flex-row flex-nowrap mx-auto sn-gap">
@@ -52,12 +53,12 @@
     {{-- 金额汇总 + 提交（窄屏在下、@4xl 起右侧栏）；行渲染统一走 FieldInfo（翻译键求值 + 金额格式化） --}}
     <div class="flex-none w-full @4xl:w-96 sn-container sn-padded h-fit">
         <div class="flex flex-col w-full sn-gap">
-            @foreach (\Wsmallnews\Order\Support\FieldInfo::sorted($amount_fields_info ?? []) as $item)
-                {{ \Wsmallnews\Order\Support\FieldInfo::render($item) }}
+            @foreach (FieldInfo::sorted($amount_fields_info ?? []) as $item)
+                {{ FieldInfo::render($item) }}
             @endforeach
 
-            @foreach (\Wsmallnews\Order\Support\FieldInfo::sorted($discount_fields_info ?? []) as $item)
-                {{ \Wsmallnews\Order\Support\FieldInfo::render($item) }}
+            @foreach (FieldInfo::sorted($discount_fields_info ?? []) as $item)
+                {{ FieldInfo::render($item) }}
             @endforeach
         </div>
 

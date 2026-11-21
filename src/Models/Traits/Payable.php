@@ -107,7 +107,7 @@ trait Payable
      */
     public function getPaidFee(bool $is_lock = false): int
     {
-        $query = $this->payRecords()->scopeable($this->getScopeType(), $this->getScopeId())->paid();
+        $query = $this->payRecords()->forScopeable($this->getScopeable(), withTenant: false)->paid();
         $is_lock && $query->lockForUpdate();        // 加锁
 
         return (int) $query->sum('real_fee');
@@ -118,7 +118,7 @@ trait Payable
      */
     public function getPaidPayRecords(bool $is_lock = false): Collection
     {
-        $query = $this->payRecords()->scopeable($this->getScopeType(), $this->getScopeId())->paid();
+        $query = $this->payRecords()->forScopeable($this->getScopeable(), withTenant: false)->paid();
         $is_lock && $query->lockForUpdate();        // 加锁
 
         return $query->orderBy('id', 'asc')->get();
