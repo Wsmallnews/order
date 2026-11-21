@@ -62,7 +62,7 @@ class OrderServiceProvider extends PackageServiceProvider
         ModuleRegistry::register(new Module(
             id: static::$name,
             namespace: 'Wsmallnews\\Order',
-            plugin: OrderPlugin::class,
+            plugin: null,
         ));
 
         // 配方注册表（订单类型 → Shortcut 配方注册/反查）

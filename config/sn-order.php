@@ -8,19 +8,6 @@ use Wsmallnews\Order\Models\OrderItem;
 // config for Wsmallnews/Order
 return [
     /**
-     * Scopeable 实例声明（单一事实源）
-     *
-     * main 为默认实例（必须存在）；未显式引用实例键的组件均使用 main，
-     * 只有需要差异分区的实例才在此声明。
-     */
-    'scopeables' => [
-        'main' => [
-            'scope_type' => 'sn-order',
-            'scope_id' => 0,
-        ],
-    ],
-
-    /**
      * Custom models
      */
     'models' => [
@@ -36,21 +23,11 @@ return [
      *   - navigation_group: 所有页面/资源的默认导航组
      *
      * 条目格式：
-     *   - 简单 FQCN：ClassName::class（仅合并共享默认）
-     *   - 键值对：ClassName::class => ['key' => 'value']（合并共享默认 + 自定义覆盖）
-     *   - 配置项键名使用 snake_case（如 navigation_label、navigation_icon）
+    /**
+     * 本包组件消费 scope：引入必须声明 scopeable（默认 [pluginId, 0]，子 scope 用 scope_suffix）。
+     *
+     * 资源清单（默认解开即注册；内存注入 resources([...]) 对同类覆盖）。
      */
-    'panel_register' => [
-        'global_default' => [
-            'navigation_group' => 'sn-order::order.global_default.navigation_group',
-        ],
-        'resources' => [
-            OrderResource::class => [
-                'navigation_sort' => 1,
-            ],
-        ],
-        'pages' => [],
-    ],
 
     /**
      * 文件基础目录，会自动拼接当前年月日 (仅用于 filament 默认上传组件 (Forms\Components\FileUpload))
