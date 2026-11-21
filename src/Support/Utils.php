@@ -24,7 +24,6 @@ class Utils
         return $name ? (data_get($config, $name) ?? $default) : $config;
     }
 
-
     /**
      * Get model class by name.
      *

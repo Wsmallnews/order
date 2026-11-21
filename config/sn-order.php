@@ -1,6 +1,5 @@
 <?php
 
-use Wsmallnews\Order\Filament\Resources\Orders\OrderResource;
 use Wsmallnews\Order\Models\Order;
 use Wsmallnews\Order\Models\OrderAction;
 use Wsmallnews\Order\Models\OrderItem;
