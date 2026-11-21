@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Wsmallnews\Order\Support;
 
 use Wsmallnews\Order\Exceptions\OrderException;
-ss
+
 /**
  * Utility class for Order package configuration and helpers.
  */
